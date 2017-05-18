@@ -2,18 +2,17 @@
 
 #include <string>
 
+#include "common/common/utility.h"
 #include "common/tracing/http_tracer_impl.h"
 #include "common/tracing/lightstep_tracer_impl.h"
-#include "common/common/utility.h"
 
 namespace Envoy {
 namespace Server {
 namespace Configuration {
 
-Tracing::HttpTracerPtr LightstepTracerFactory::tryCreateHttpTracer(const std::string &type,
-                                                const Json::Object& json_config,
-                                                Server::Instance& server,
-                                                Upstream::ClusterManager &cluster_manager) {
+Tracing::HttpTracerPtr LightstepTracerFactory::tryCreateHttpTracer(
+    const std::string& type, const Json::Object& json_config, Server::Instance& server,
+    Upstream::ClusterManager& cluster_manager) {
   if (type != "lightstep") {
     return nullptr;
   }
@@ -21,8 +20,7 @@ Tracing::HttpTracerPtr LightstepTracerFactory::tryCreateHttpTracer(const std::st
   Envoy::Runtime::RandomGenerator& rand = server.random();
 
   std::unique_ptr<lightstep::TracerOptions> opts(new lightstep::TracerOptions());
-  opts->access_token =
-      server.api().fileReadToEnd(json_config.getString("access_token_file"));
+  opts->access_token = server.api().fileReadToEnd(json_config.getString("access_token_file"));
   StringUtil::rtrim(opts->access_token);
 
   opts->tracer_attributes["lightstep.component_name"] = server.localInfo().clusterName();
@@ -31,7 +29,8 @@ Tracing::HttpTracerPtr LightstepTracerFactory::tryCreateHttpTracer(const std::st
   Tracing::DriverPtr lightstep_driver(
       new Tracing::LightStepDriver(json_config, cluster_manager, server.stats(),
                                    server.threadLocal(), server.runtime(), std::move(opts)));
-  return Tracing::HttpTracerPtr(new Tracing::HttpTracerImpl(std::move(lightstep_driver), server.localInfo()));
+  return Tracing::HttpTracerPtr(
+      new Tracing::HttpTracerImpl(std::move(lightstep_driver), server.localInfo()));
 }
 
 /**

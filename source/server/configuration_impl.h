@@ -52,9 +52,9 @@ class HttpTracerFactory {
 public:
   virtual ~HttpTracerFactory() {}
 
-  virtual Tracing::HttpTracerPtr tryCreateHttpTracer(const std::string &type,
-                                                const Json::Object& json_config,
-                                                Server::Instance& server, Upstream::ClusterManager &cluster_manager) PURE;
+  virtual Tracing::HttpTracerPtr
+  tryCreateHttpTracer(const std::string& type, const Json::Object& json_config,
+                      Server::Instance& server, Upstream::ClusterManager& cluster_manager) PURE;
 };
 
 /**

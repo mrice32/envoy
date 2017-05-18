@@ -119,8 +119,9 @@ void MainImpl::initializeTracers(const Json::Object& configuration) {
   Json::ObjectSharedPtr driver_config = driver->getObject("config");
 
   bool found_tracer = false;
-  for (HttpTracerFactory *http_tracer_factory : httpTracerFactories()) {
-    Tracing::HttpTracerPtr http_tracer = http_tracer_factory->tryCreateHttpTracer(type, *driver_config, server_, *cluster_manager_);
+  for (HttpTracerFactory* http_tracer_factory : httpTracerFactories()) {
+    Tracing::HttpTracerPtr http_tracer =
+        http_tracer_factory->tryCreateHttpTracer(type, *driver_config, server_, *cluster_manager_);
     if (http_tracer) {
       http_tracer_ = std::move(http_tracer);
       found_tracer = true;
