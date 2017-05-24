@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 bool TestUtility::buffersEqual(const Buffer::Instance& lhs, const Buffer::Instance& rhs) {
   if (lhs.length() != rhs.length()) {

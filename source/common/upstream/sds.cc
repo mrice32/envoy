@@ -92,7 +92,7 @@ void SdsClusterImpl::onFetchFailure(EnvoyException* e) {
   log_debug("sds refresh failure for cluster: {}", info_->name());
   info_->stats().update_failure_.inc();
   if (e) {
-    log().warn("sds parsing error: {}", e->what());
+    LOG(WARNING) << fmt::format("sds parsing error: {}", e->what());
   }
 }
 

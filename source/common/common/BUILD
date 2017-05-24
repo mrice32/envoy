@@ -67,6 +67,7 @@ envoy_cc_library(
         ":macros",
         "//include/envoy/thread:thread_interface",
     ],
+    external_deps = ["glog"],
 )
 
 envoy_cc_library(

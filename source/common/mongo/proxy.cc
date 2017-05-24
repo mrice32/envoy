@@ -14,6 +14,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 namespace Mongo {
 
@@ -206,7 +207,7 @@ void ProxyFilter::doDecode(Buffer::Instance& buffer) {
   try {
     decoder_->onData(buffer);
   } catch (EnvoyException& e) {
-    log().info("mongo decoding error: {}", e.what());
+    LOG(INFO) << fmt::format("mongo decoding error: {}", e.what());
     stats_.decoding_error_.inc();
     sniffing_ = false;
   }

@@ -11,6 +11,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 std::string Hex::encode(const uint8_t* data, size_t length) {
   static const char* const digits = "0123456789abcdef";

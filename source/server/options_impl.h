@@ -8,6 +8,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 /**
  * Implementation of Server::Options.

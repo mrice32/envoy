@@ -10,6 +10,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 namespace Bson {
 

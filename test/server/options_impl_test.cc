@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 // Do the ugly work of turning a std::string into a char** and create an OptionsImpl. Args are
 // separated by a single space: no fancy quoting or escaping.

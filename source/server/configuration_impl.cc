@@ -23,6 +23,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 namespace Server {
 namespace Configuration {
@@ -49,9 +50,9 @@ void MainImpl::initialize(const Json::Object& json) {
       server_.accessLogManager()));
 
   std::vector<Json::ObjectSharedPtr> listeners = json.getObjectArray("listeners");
-  log().info("loading {} listener(s)", listeners.size());
+  LOG(INFO) << fmt::format("loading {} listener(s)", listeners.size());
   for (size_t i = 0; i < listeners.size(); i++) {
-    log().info("listener #{}:", i);
+    LOG(INFO) << fmt::format("listener #{}:", i);
     listeners_.emplace_back(
         Server::Configuration::ListenerPtr{new ListenerConfig(*this, *listeners[i])});
   }
@@ -91,7 +92,7 @@ void MainImpl::initialize(const Json::Object& json) {
 }
 
 void MainImpl::initializeTracers(const Json::Object& configuration) {
-  log().info("loading tracing configuration");
+  LOG(INFO) << fmt::format("loading tracing configuration");
 
   if (!configuration.hasObject("tracing")) {
     http_tracer_.reset(new Tracing::HttpNullTracer());
@@ -114,7 +115,7 @@ void MainImpl::initializeTracers(const Json::Object& configuration) {
   Json::ObjectSharedPtr driver = http_tracer_config->getObject("driver");
 
   std::string type = driver->getString("type");
-  log().info(fmt::format("  loading tracing driver: {}", type));
+  LOG(INFO) << fmt::format(fmt::format("  loading tracing driver: {}", type));
 
   Json::ObjectSharedPtr driver_config = driver->getObject("config");
 
@@ -138,7 +139,7 @@ MainImpl::ListenerConfig::ListenerConfig(MainImpl& parent, Json::Object& json) :
   std::replace(final_stat_name.begin(), final_stat_name.end(), ':', '_');
 
   scope_ = parent_.server_.stats().createScope(final_stat_name);
-  log().info("  address={}", address_->asString());
+  LOG(INFO) << fmt::format("  address={}", address_->asString());
 
   json.validateSchema(Json::Schema::LISTENER_SCHEMA);
 
@@ -159,9 +160,9 @@ MainImpl::ListenerConfig::ListenerConfig(MainImpl& parent, Json::Object& json) :
     std::string string_type = filters[i]->getString("type");
     std::string string_name = filters[i]->getString("name");
     Json::ObjectSharedPtr config = filters[i]->getObject("config");
-    log().info("  filter #{}:", i);
-    log().info("    type: {}", string_type);
-    log().info("    name: {}", string_name);
+    LOG(INFO) << fmt::format("  filter #{}:", i);
+    LOG(INFO) << fmt::format("    type: {}", string_type);
+    LOG(INFO) << fmt::format("    name: {}", string_name);
 
     // Map filter type string to enum.
     NetworkFilterType type;

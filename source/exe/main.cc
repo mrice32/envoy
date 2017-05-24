@@ -21,6 +21,7 @@
 #include "ares.h"
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 namespace Server {
 
@@ -45,6 +46,7 @@ int main(int argc, char** argv) {
   // Enabled by default. Control with "bazel --define=signal_trace=disabled"
   Envoy::SignalAction handle_sigs;
 #endif
+  google::InitGoogleLogging(argv[0]);
   ares_library_init(ARES_LIB_INIT_ALL);
   Envoy::Event::Libevent::Global::initialize();
   Envoy::OptionsImpl options(argc, argv, Envoy::Server::SharedMemory::version(),

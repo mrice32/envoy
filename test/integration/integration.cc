@@ -27,6 +27,7 @@
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 IntegrationStreamDecoder::IntegrationStreamDecoder(Event::Dispatcher& dispatcher)
     : dispatcher_(dispatcher) {}

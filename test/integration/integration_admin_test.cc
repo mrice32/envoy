@@ -8,6 +8,7 @@
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 TEST_F(IntegrationTest, HealthCheck) {
   BufferingStreamDecoderPtr response = IntegrationUtil::makeSingleRequest(

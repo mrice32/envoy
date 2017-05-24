@@ -15,6 +15,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 // Do not let RapidJson leak outside of this file.
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"

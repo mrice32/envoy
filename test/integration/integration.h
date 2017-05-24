@@ -18,6 +18,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 /**
  * Stream decoder wrapper used during integration testing.

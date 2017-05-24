@@ -19,6 +19,7 @@
 
 #include "spdlog/spdlog.h"
 
+
 namespace Envoy {
 namespace Server {
 
@@ -379,7 +380,7 @@ void HotRestartImpl::onSocketEvent() {
     }
 
     case RpcMessageType::TerminateRequest: {
-      log().warn("shutting down due to child request");
+      LOG(WARNING) << fmt::format("shutting down due to child request");
       kill(getpid(), SIGTERM);
       break;
     }
