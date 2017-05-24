@@ -196,7 +196,7 @@ FakeStreamPtr FakeHttpConnection::waitForNewStream() {
 FakeUpstream::FakeUpstream(const std::string& uds_path, FakeHttpConnection::Type type)
     : FakeUpstream(nullptr, Network::ListenSocketPtr{new Network::UdsListenSocket(uds_path)},
                    type) {
-  log().info("starting fake server on unix domain socket {}", uds_path);
+  LOG(INFO) << fmt::format("starting fake server on unix domain socket {}", uds_path);
 }
 
 // TODO(henna): Deprecate when IPv6 test support is finished.
@@ -217,20 +217,22 @@ static Network::ListenSocketPtr makeTcpListenSocket(const Network::Address::IpVe
 // TODO(henna): Deprecate when IPv6 test support is finished.
 FakeUpstream::FakeUpstream(uint32_t port, FakeHttpConnection::Type type)
     : FakeUpstream(nullptr, makeTcpListenSocket(port), type) {
-  log().info("starting fake server on port {}", this->localAddress()->ip()->port());
+  LOG(INFO) << fmt::format("starting fake server on port {}", this->localAddress()->ip()->port());
 }
 
 FakeUpstream::FakeUpstream(Network::Address::IpVersion version, uint32_t port,
                            FakeHttpConnection::Type type)
     : FakeUpstream(nullptr, makeTcpListenSocket(version, port), type) {
-  log().info("starting fake server on port {}. Address version is {}",
-             this->localAddress()->ip()->port(), Network::Test::addressVersionAsString(version));
+  LOG(INFO) << fmt::format("starting fake server on port {}. Address version is {}",
+                           this->localAddress()->ip()->port(),
+                           Network::Test::addressVersionAsString(version));
 }
 
 FakeUpstream::FakeUpstream(Ssl::ServerContext* ssl_ctx, uint32_t port,
                            FakeHttpConnection::Type type)
     : FakeUpstream(ssl_ctx, makeTcpListenSocket(port), type) {
-  log().info("starting fake SSL server on port {}", this->localAddress()->ip()->port());
+  LOG(INFO) << fmt::format("starting fake SSL server on port {}",
+                           this->localAddress()->ip()->port());
 }
 
 FakeUpstream::FakeUpstream(Ssl::ServerContext* ssl_ctx, Network::ListenSocketPtr&& listen_socket,

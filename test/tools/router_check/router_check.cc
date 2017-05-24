@@ -4,10 +4,18 @@
 
 #include "test/tools/router_check/router.h"
 
+#ifdef GLOG_ON
+#include "glog/logging.h"
+#endif
+
 int main(int argc, char* argv[]) {
   if (argc < 3 || argc > 4) {
     return EXIT_FAILURE;
   }
+
+#ifdef GLOG_ON
+  google::InitGoogleLogging(argv[0]);
+#endif
 
   try {
     Envoy::RouterCheckTool checktool = Envoy::RouterCheckTool::create(argv[1]);

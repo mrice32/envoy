@@ -1,9 +1,14 @@
 // NOLINT(namespace-envoy)
+
 #include "test/test_common/environment.h"
 #include "test/test_runner.h"
 
 #ifdef ENVOY_HANDLE_SIGNALS
 #include "exe/signal_action.h"
+#endif
+
+#ifdef GLOG_ON
+#include "glog/logging.h"
 #endif
 
 const char* __asan_default_options() {
@@ -17,6 +22,10 @@ int main(int argc, char** argv) {
 #ifdef ENVOY_HANDLE_SIGNALS
   // Enabled by default. Control with "bazel --define=signal_trace=disabled"
   Envoy::SignalAction handle_sigs;
+#endif
+
+#ifdef GLOG_ON
+  google::InitGoogleLogging(argv[0]);
 #endif
 
   ::setenv("TEST_RUNDIR", (Envoy::TestEnvironment::getCheckedEnvVar("TEST_SRCDIR") + "/" +
