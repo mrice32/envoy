@@ -10,6 +10,7 @@
 #include "common/common/macros.h"
 
 #include "spdlog/spdlog.h"
+#include "glog/logging.h"
 
 namespace Envoy {
 namespace Logger {
