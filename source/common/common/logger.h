@@ -17,12 +17,14 @@
 
 namespace Envoy {
 
+#ifndef GLOG_ON
 constexpr int TRACE = 1;
 constexpr int DEBUG = 2;
 constexpr int INFO = 3;
 constexpr int WARNING = 4;
 constexpr int ERROR = 5;
 constexpr int FATAL = 6;
+#endif
 
 namespace Logger {
 
@@ -83,6 +85,7 @@ public:
       logger_.critical(str());
       break;
       default:
+      logger_.trace(str());
       break;
     }
   }
