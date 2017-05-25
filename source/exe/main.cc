@@ -46,7 +46,10 @@ int main(int argc, char** argv) {
   // Enabled by default. Control with "bazel --define=signal_trace=disabled"
   Envoy::SignalAction handle_sigs;
 #endif
+
+#ifdef GLOG_ON
   google::InitGoogleLogging(argv[0]);
+#endif
   ares_library_init(ARES_LIB_INIT_ALL);
   Envoy::Event::Libevent::Global::initialize();
   Envoy::OptionsImpl options(argc, argv, Envoy::Server::SharedMemory::version(),

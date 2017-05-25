@@ -1,6 +1,7 @@
 #include "common/mongo/codec_impl.h"
 
 #include <cstdint>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <sstream>
@@ -43,7 +44,7 @@ void GetMoreMessageImpl::fromBuffer(uint32_t, Buffer::Instance& data) {
   full_collection_name_ = Bson::BufferHelper::removeCString(data);
   number_to_return_ = Bson::BufferHelper::removeInt32(data);
   cursor_id_ = Bson::BufferHelper::removeInt64(data);
-  log_trace(toString(true));
+  log_trace("{}", toString(true));
 }
 
 bool GetMoreMessageImpl::operator==(const GetMoreMessage& rhs) const {
@@ -70,7 +71,7 @@ void InsertMessageImpl::fromBuffer(uint32_t message_length, Buffer::Instance& da
     documents_.emplace_back(Bson::DocumentImpl::create(data));
   }
 
-  log_trace(toString(true));
+  log_trace("{}", toString(true));
 }
 
 bool InsertMessageImpl::operator==(const InsertMessage& rhs) const {
@@ -106,7 +107,7 @@ void KillCursorsMessageImpl::fromBuffer(uint32_t, Buffer::Instance& data) {
     cursor_ids_.push_back(Bson::BufferHelper::removeInt64(data));
   }
 
-  log_trace(toString(true));
+  log_trace("{}", toString(true));
 }
 
 bool KillCursorsMessageImpl::operator==(const KillCursorsMessage& rhs) const {
@@ -147,7 +148,7 @@ void QueryMessageImpl::fromBuffer(uint32_t message_length, Buffer::Instance& dat
     return_fields_selector_ = Bson::DocumentImpl::create(data);
   }
 
-  log_trace(toString(true));
+  log_trace("{}", toString(true));
 }
 
 bool QueryMessageImpl::operator==(const QueryMessage& rhs) const {
@@ -192,7 +193,7 @@ void ReplyMessageImpl::fromBuffer(uint32_t, Buffer::Instance& data) {
     documents_.emplace_back(Bson::DocumentImpl::create(data));
   }
 
-  log_trace(toString(true));
+  log_trace("{}", toString(true));
 }
 
 bool ReplyMessageImpl::operator==(const ReplyMessage& rhs) const {

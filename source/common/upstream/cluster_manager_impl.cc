@@ -47,7 +47,7 @@ void ClusterManagerInitHelper::addCluster(Cluster& cluster) {
     }
   }
 
-  LOG(INFO) << fmt::format("cm init: adding: cluster={} primary={} secondary={}", cluster.info()->name(),
+  LG(log(), INFO) << fmt::format("cm init: adding: cluster={} primary={} secondary={}", cluster.info()->name(),
              primary_init_clusters_.size(), secondary_init_clusters_.size());
   cluster.setInitializedCb([&cluster, this]() -> void {
     ASSERT(state_ != State::AllClustersInitialized);
@@ -73,7 +73,7 @@ void ClusterManagerInitHelper::removeCluster(Cluster& cluster) {
   // It is possible that the cluster we are removing has already been initialized, and is not
   // present in the initializer list. If so, this is fine.
   cluster_list->remove(&cluster);
-  LOG(INFO) << fmt::format("cm init: removing: cluster={} primary={} secondary={}", cluster.info()->name(),
+  LG(log(), INFO) << fmt::format("cm init: removing: cluster={} primary={} secondary={}", cluster.info()->name(),
              primary_init_clusters_.size(), secondary_init_clusters_.size());
   maybeFinishInitialize();
 }
@@ -95,7 +95,7 @@ void ClusterManagerInitHelper::maybeFinishInitialize() {
   // initialize on them. This is only done once.
   if (!secondary_init_clusters_.empty()) {
     if (!started_secondary_initialize_) {
-      LOG(INFO) << fmt::format("cm init: initializing secondary clusters");
+      LG(log(), INFO) << fmt::format("cm init: initializing secondary clusters");
       started_secondary_initialize_ = true;
       // Cluster::initialize() method can modify the list of secondary_init_clusters_ to remove
       // the item currently being initialized, so we eschew range-based-for and do this complicated
@@ -114,7 +114,7 @@ void ClusterManagerInitHelper::maybeFinishInitialize() {
   // directly to initialized.
   started_secondary_initialize_ = false;
   if (state_ == State::WaitingForStaticInitialize && cds_) {
-    LOG(INFO) << fmt::format("cm init: initializing cds");
+    LG(log(), INFO) << fmt::format("cm init: initializing cds");
     state_ = State::WaitingForCdsInitialize;
     cds_->initialize();
   } else {

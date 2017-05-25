@@ -364,7 +364,7 @@ AdminImpl::AdminImpl(const std::string& access_log_path, const std::string& prof
   if (!address_out_path.empty()) {
     std::ofstream address_out_file(address_out_path);
     if (!address_out_file) {
-      LOG(ERROR) << fmt::format("cannot open admin address output file {} for writing.", address_out_path);
+      LG(log(), ERROR) << fmt::format("cannot open admin address output file {} for writing.", address_out_path);
     } else {
       address_out_file << socket_->localAddress()->asString();
     }

@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
   // Enabled by default. Control with "bazel --define=signal_trace=disabled"
   Envoy::SignalAction handle_sigs;
 #endif
-  google::InitGoogleLogging(argv[0]);
 
   ::setenv("TEST_RUNDIR", (Envoy::TestEnvironment::getCheckedEnvVar("TEST_SRCDIR") + "/" +
                            Envoy::TestEnvironment::getCheckedEnvVar("TEST_WORKSPACE")).c_str(),
