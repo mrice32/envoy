@@ -58,13 +58,13 @@ void CdsApiImpl::parseResponse(const Http::Message& response) {
     std::string cluster_name = cluster->getString("name");
     clusters_to_remove.erase(cluster_name);
     if (cm_.addOrUpdatePrimaryCluster(*cluster)) {
-      LG(log(), INFO) << fmt::format("cds: add/update cluster '{}'", cluster_name);
+      LOG(INFO) << fmt::format("cds: add/update cluster '{}'", cluster_name);
     }
   }
 
   for (auto cluster : clusters_to_remove) {
     if (cm_.removePrimaryCluster(cluster.first)) {
-      LG(log(), INFO) << fmt::format("cds: remove cluster '{}'", cluster.first);
+      LOG(INFO) << fmt::format("cds: remove cluster '{}'", cluster.first);
     }
   }
 
@@ -81,9 +81,9 @@ void CdsApiImpl::onFetchComplete() {
 void CdsApiImpl::onFetchFailure(EnvoyException* e) {
   stats_.update_failure_.inc();
   if (e) {
-    LG(log(), WARNING) << fmt::format("cds: fetch failure: {}", e->what());
+    LOG(WARNING) << fmt::format("cds: fetch failure: {}", e->what());
   } else {
-    LG(log(), INFO) << fmt::format("cds: fetch failure: network error");
+    LOG(INFO) << fmt::format("cds: fetch failure: network error");
   }
 }
 

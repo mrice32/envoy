@@ -115,9 +115,9 @@ void RdsRouteConfigProviderImpl::onFetchComplete() {
 void RdsRouteConfigProviderImpl::onFetchFailure(EnvoyException* e) {
   stats_.update_failure_.inc();
   if (e) {
-    LG(log(), WARNING) << fmt::format("rds: fetch failure: {}", e->what());
+    LOG(WARNING) << fmt::format("rds: fetch failure: {}", e->what());
   } else {
-    LG(log(), INFO) << fmt::format("rds: fetch failure: network error");
+    LOG(INFO) << fmt::format("rds: fetch failure: network error");
   }
 }
 

@@ -52,7 +52,7 @@ void ConnectionHandlerImpl::closeListeners() {
 }
 
 void ConnectionHandlerImpl::removeConnection(ActiveConnection& connection) {
-  conn_log(LG, logger_, INFO, "adding to cleanup list", *connection.connection_);
+  conn_log(LOG, logger_, INFO, "adding to cleanup list", *connection.connection_);
   ActiveConnectionPtr removed = connection.removeFromList(connections_);
   dispatcher_->deferredDelete(std::move(removed));
   num_connections_--;
@@ -110,7 +110,7 @@ ConnectionHandlerImpl::findListenerByAddress(const Network::Address::Instance& a
 
 void ConnectionHandlerImpl::ActiveListener::onNewConnection(
     Network::ConnectionPtr&& new_connection) {
-  conn_log(LG, parent_.logger_, INFO, "new connection", *new_connection);
+  conn_log(LOG, parent_.logger_, INFO, "new connection", *new_connection);
   bool empty_filter_chain = !factory_.createFilterChain(*new_connection);
 
   // If the connection is already closed, we can just let this connection immediately die.
@@ -118,7 +118,7 @@ void ConnectionHandlerImpl::ActiveListener::onNewConnection(
     // Close the connection if the filter chain is empty to avoid leaving open connections
     // with nothing to do.
     if (empty_filter_chain) {
-      conn_log(LG, parent_.logger_, INFO, "closing connection: no filters", *new_connection);
+      conn_log(LOG, parent_.logger_, INFO, "closing connection: no filters", *new_connection);
       new_connection->close(Network::ConnectionCloseType::NoFlush);
     } else {
       ActiveConnectionPtr active_connection(

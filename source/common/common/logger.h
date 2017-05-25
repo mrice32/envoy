@@ -57,9 +57,9 @@ enum class Id {
 
 #ifdef GLOG_ON
 
-#define LG(LOG_OBJECT, LEVEL) LOG(LEVEL)
+#define LOG_TO_OBJECT(LOG_OBJECT, LEVEL) LOG(LEVEL)
 
-#define VLG(LOG, LEVEL) VLOG(LEVEL)
+#define VLOG_TO_OBJECT(LOG, LEVEL) VLOG(LEVEL)
 
 #else
 
@@ -98,10 +98,13 @@ private:
   const int log_severity_; 
 };
 
-#define LG(LOG_OBJECT, LEVEL) Logger::SpdLogStream(LOG_OBJECT, LEVEL)
+#define LOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::SpdLogStream(LOG_OBJECT, LEVEL)
 
-#define VLG(LOG_OBJECT, LEVEL) (LEVEL == 1) ? Logger::SpdLogStream(LOG_OBJECT, DEBUG) : Logger::SpdLogStream(LOG_OBJECT, TRACE)
+#define VLOG_TO_OBJECT(LOG_OBJECT, LEVEL) (LEVEL == 1) ? Logger::SpdLogStream(LOG_OBJECT, DEBUG) : Logger::SpdLogStream(LOG_OBJECT, TRACE)
 
+#define LOG(LEVEL) LOG_TO_OBJECT(log(), LEVEL)
+
+#define VLOG(LEVEL) VLOG_TO_OBJECT(log(), LEVEL)
 
 #endif
 
@@ -193,45 +196,45 @@ protected:
 #define log_trace(...)
 #define log_debug(...)
 #else
-#define log_trace(...) VLG(log(), 2) << fmt::format(__VA_ARGS__)
-#define log_debug(...) VLG(log(), 1) << fmt::format(__VA_ARGS__)
+#define log_trace(...) VLOG(2) << fmt::format(__VA_ARGS__)
+#define log_debug(...) VLOG(1) << fmt::format(__VA_ARGS__)
 #endif
 
 /**
  * Convenience macros for logging with connection ID.
  */
 #define conn_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, CONNECTION, ...)                                              \
-  LOG_TYPE(LOG_OBJECT, LEVEL) << fmt::format("[C{}] " FORMAT, (CONNECTION).id(), ##__VA_ARGS__)
+  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL) << fmt::format("[C{}] " FORMAT, (CONNECTION).id(), ##__VA_ARGS__)
 
 #ifdef NDEBUG
 #define conn_log_trace(...)
 #define conn_log_debug(...)
 #else
 #define conn_log_trace(FORMAT, CONNECTION, ...)                                                    \
-  conn_log(VLG, log(), 2, FORMAT, CONNECTION, ##__VA_ARGS__)
+  conn_log(VLOG, log(), 2, FORMAT, CONNECTION, ##__VA_ARGS__)
 #define conn_log_debug(FORMAT, CONNECTION, ...)                                                    \
-  conn_log(VLG, log(), 1, FORMAT, CONNECTION, ##__VA_ARGS__)
+  conn_log(VLOG, log(), 1, FORMAT, CONNECTION, ##__VA_ARGS__)
 #endif
 
 #define conn_log_info(FORMAT, CONNECTION, ...)                                                     \
-  conn_log(LG, log(), INFO, FORMAT, CONNECTION, ##__VA_ARGS__)
+  conn_log(LOG, log(), INFO, FORMAT, CONNECTION, ##__VA_ARGS__)
 
 /**
  * Convenience macros for logging with a stream ID and a connection ID.
  */
 #define stream_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, STREAM, ...)                                                \
-  LOG_TYPE(LOG_OBJECT, LEVEL) << fmt::format("[C{}][S{}] " FORMAT, (STREAM).connectionId(), (STREAM).streamId(), ##__VA_ARGS__)
+  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL) << fmt::format("[C{}][S{}] " FORMAT, (STREAM).connectionId(), (STREAM).streamId(), ##__VA_ARGS__)
 
 #ifdef NDEBUG
 #define stream_log_trace(...)
 #define stream_log_debug(...)
 #else
 #define stream_log_trace(FORMAT, STREAM, ...)                                                      \
-  stream_log(VLG, log(), 2, FORMAT, STREAM, ##__VA_ARGS__)
+  stream_log(VLOG, log(), 2, FORMAT, STREAM, ##__VA_ARGS__)
 #define stream_log_debug(FORMAT, STREAM, ...)                                                      \
-  stream_log(VLG, log(), 1, FORMAT, STREAM, ##__VA_ARGS__)
+  stream_log(VLOG, log(), 1, FORMAT, STREAM, ##__VA_ARGS__)
 #endif
 
-#define stream_log_info(FORMAT, STREAM, ...) stream_log(LG, log(), INFO, FORMAT, STREAM, ##__VA_ARGS__)
+#define stream_log_info(FORMAT, STREAM, ...) stream_log(LOG, log(), INFO, FORMAT, STREAM, ##__VA_ARGS__)
 
 } // Envoy
