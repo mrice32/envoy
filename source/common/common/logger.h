@@ -13,20 +13,29 @@
 #include "spdlog/spdlog.h"
 
 #ifdef GLOG_ON
-#include "glog/logging.h"
-#endif
 
+#include "glog/logging.h"
+
+#else
+
+// When glog is not used, these values replace the #defines from glog.
 namespace Envoy {
 
-#ifndef GLOG_ON
+// SPD_ONLY because TRACE and DEBUG are not used in glog.  These are defined for use in macros below
+// to convert the internal definition of VLOG(x) to types of logging that spdlog understands.
 constexpr int SPD_ONLY_TRACE = 1;
 constexpr int SPD_ONLY_DEBUG = 2;
+
+// Declare the usual glog #defines with internally defined values to leave space for the two constants defined above.
 constexpr int INFO = 3;
 constexpr int WARNING = 4;
 constexpr int ERROR = 5;
 constexpr int FATAL = 6;
+} // Envoy
+
 #endif
 
+namespace Envoy {
 namespace Logger {
 
 // clang-format off
@@ -113,6 +122,22 @@ private:
 
 #endif
 
+
+class Logger { 
+  public:
+  std::string levelString() const { return spdlog::level::level_names[logger_->level()]; }
+  std::string name() const { return logger_->name(); }
+  void setLevel(spdlog::level::level_enum level) const { logger_->set_level(level); }
+  LogSink &sink();
+
+private:
+  Logger(const std::string& name);
+
+  friend class Registry;
+};
+
+
+
 /**
  * Logger wrapper for a spdlog logger.
  */
@@ -121,6 +146,7 @@ public:
   std::string levelString() const { return spdlog::level::level_names[logger_->level()]; }
   std::string name() const { return logger_->name(); }
   void setLevel(spdlog::level::level_enum level) const { logger_->set_level(level); }
+  spdlog::logger &spdlog() const { return *logger_; }
 
 private:
   Logger(const std::string& name);
@@ -155,7 +181,7 @@ public:
    * @param id supplies the fixed ID of the logger to create.
    * @return spdlog::logger& a logger with system specified sinks for a given ID.
    */
-  static spdlog::logger& getLog(Id id);
+  static Logger& getLog(Id id);
 
   /**
    * @return the singleton sink to use for all loggers.
@@ -187,8 +213,8 @@ protected:
   /**
    * @return spdlog::logger& the static log instance to use for class local logging.
    */
-  static spdlog::logger& log() {
-    static spdlog::logger& instance = Registry::getLog(id);
+  static Logger& log() {
+    static Logger& instance = Registry::getLog(id);
     return instance;
   }
 };
