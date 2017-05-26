@@ -63,44 +63,49 @@ enum class Id {
 
 #else
 
-class SpdLogStream : public std::stringstream {
+class SpdLogStream {
 public:
   SpdLogStream(spdlog::logger &logger, int log_severity) : logger_(logger), log_severity_(log_severity) {
   }
   virtual ~SpdLogStream() {
     switch (log_severity_) {
       case TRACE:
-      logger_.trace(str());
+      logger_.trace(stream_.str());
       break;
       case DEBUG:
-      logger_.debug(str());
+      logger_.debug(stream_.str());
       break;
       case INFO:
-      logger_.info(str());
+      logger_.info(stream_.str());
       break;
       case WARNING:
-      logger_.warn(str());
+      logger_.warn(stream_.str());
       break;
       case ERROR:
-      logger_.critical(str());
+      logger_.critical(stream_.str());
       break;
       default:
-      logger_.trace(str());
+      logger_.trace(stream_.str());
       break;
     }
   }
 
-  SpdLogStream(SpdLogStream &&) = default;
+  template <typename T>
+  SpdLogStream& operator<<(T&& t) {
+    stream_ << std::forward<T>(t);
+    return *this;
+  }
 
 private:
 
+  std::ostringstream stream_;
   spdlog::logger &logger_;
   const int log_severity_; 
 };
 
 #define LOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::SpdLogStream(LOG_OBJECT, LEVEL)
 
-#define VLOG_TO_OBJECT(LOG_OBJECT, LEVEL) (LEVEL == 1) ? Logger::SpdLogStream(LOG_OBJECT, DEBUG) : Logger::SpdLogStream(LOG_OBJECT, TRACE)
+#define VLOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::SpdLogStream(LOG_OBJECT, (LEVEL == 1) ? DEBUG : TRACE)
 
 #define LOG(LEVEL) LOG_TO_OBJECT(log(), LEVEL)
 
