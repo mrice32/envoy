@@ -24,7 +24,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 namespace Upstream {
 
@@ -47,8 +46,9 @@ void ClusterManagerInitHelper::addCluster(Cluster& cluster) {
     }
   }
 
-  LOG(INFO) << fmt::format("cm init: adding: cluster={} primary={} secondary={}", cluster.info()->name(),
-             primary_init_clusters_.size(), secondary_init_clusters_.size());
+  LOG(INFO) << fmt::format("cm init: adding: cluster={} primary={} secondary={}",
+                           cluster.info()->name(), primary_init_clusters_.size(),
+                           secondary_init_clusters_.size());
   cluster.setInitializedCb([&cluster, this]() -> void {
     ASSERT(state_ != State::AllClustersInitialized);
     removeCluster(cluster);
@@ -73,8 +73,9 @@ void ClusterManagerInitHelper::removeCluster(Cluster& cluster) {
   // It is possible that the cluster we are removing has already been initialized, and is not
   // present in the initializer list. If so, this is fine.
   cluster_list->remove(&cluster);
-  LOG(INFO) << fmt::format("cm init: removing: cluster={} primary={} secondary={}", cluster.info()->name(),
-             primary_init_clusters_.size(), secondary_init_clusters_.size());
+  LOG(INFO) << fmt::format("cm init: removing: cluster={} primary={} secondary={}",
+                           cluster.info()->name(), primary_init_clusters_.size(),
+                           secondary_init_clusters_.size());
   maybeFinishInitialize();
 }
 

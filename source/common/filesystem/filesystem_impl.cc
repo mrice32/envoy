@@ -22,7 +22,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 namespace Filesystem {
 bool fileExists(const std::string& path) {

@@ -23,7 +23,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 void BufferingStreamDecoder::decodeHeaders(Http::HeaderMapPtr&& headers, bool end_stream) {
   ASSERT(!complete_);

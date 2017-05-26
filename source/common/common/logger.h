@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <memory>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "envoy/thread/thread.h"
@@ -11,6 +11,7 @@
 #include "common/common/macros.h"
 
 #include "spdlog/spdlog.h"
+
 #ifdef GLOG_ON
 #include "glog/logging.h"
 #endif
@@ -18,8 +19,8 @@
 namespace Envoy {
 
 #ifndef GLOG_ON
-constexpr int TRACE = 1;
-constexpr int DEBUG = 2;
+constexpr int SPD_ONLY_TRACE = 1;
+constexpr int SPD_ONLY_DEBUG = 2;
 constexpr int INFO = 3;
 constexpr int WARNING = 4;
 constexpr int ERROR = 5;
@@ -65,47 +66,46 @@ enum class Id {
 
 class SpdLogStream {
 public:
-  SpdLogStream(spdlog::logger &logger, int log_severity) : logger_(logger), log_severity_(log_severity) {
-  }
+  SpdLogStream(spdlog::logger& logger, int log_severity)
+      : logger_(logger), log_severity_(log_severity) {}
   virtual ~SpdLogStream() {
     switch (log_severity_) {
-      case TRACE:
+    case SPD_ONLY_TRACE:
       logger_.trace(stream_.str());
       break;
-      case DEBUG:
+    case SPD_ONLY_DEBUG:
       logger_.debug(stream_.str());
       break;
-      case INFO:
+    case INFO:
       logger_.info(stream_.str());
       break;
-      case WARNING:
+    case WARNING:
       logger_.warn(stream_.str());
       break;
-      case ERROR:
+    case ERROR:
       logger_.critical(stream_.str());
       break;
-      default:
+    default:
       logger_.trace(stream_.str());
       break;
     }
   }
 
-  template <typename T>
-  SpdLogStream& operator<<(T&& t) {
+  template <typename T> SpdLogStream& operator<<(T&& t) {
     stream_ << std::forward<T>(t);
     return *this;
   }
 
 private:
-
   std::ostringstream stream_;
-  spdlog::logger &logger_;
-  const int log_severity_; 
+  spdlog::logger& logger_;
+  const int log_severity_;
 };
 
 #define LOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::SpdLogStream(LOG_OBJECT, LEVEL)
 
-#define VLOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::SpdLogStream(LOG_OBJECT, (LEVEL == 1) ? DEBUG : TRACE)
+#define VLOG_TO_OBJECT(LOG_OBJECT, LEVEL)                                                          \
+  Logger::SpdLogStream(LOG_OBJECT, (LEVEL == 1) ? SPD_ONLY_DEBUG : SPD_ONLY_TRACE)
 
 #define LOG(LEVEL) LOG_TO_OBJECT(log(), LEVEL)
 
@@ -120,8 +120,7 @@ class Logger {
 public:
   std::string levelString() const { return spdlog::level::level_names[logger_->level()]; }
   std::string name() const { return logger_->name(); }
-  void setLevel(spdlog::level::level_enum level) const { logger_->set_level(level);
-  }
+  void setLevel(spdlog::level::level_enum level) const { logger_->set_level(level); }
 
 private:
   Logger(const std::string& name);
@@ -196,7 +195,6 @@ protected:
 
 } // Logger
 
-
 #ifdef NDEBUG
 #define log_trace(...)
 #define log_debug(...)
@@ -208,8 +206,9 @@ protected:
 /**
  * Convenience macros for logging with connection ID.
  */
-#define conn_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, CONNECTION, ...)                                              \
-  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL) << fmt::format("[C{}] " FORMAT, (CONNECTION).id(), ##__VA_ARGS__)
+#define conn_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, CONNECTION, ...)                             \
+  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL)                                                          \
+      << fmt::format("[C{}] " FORMAT, (CONNECTION).id(), ##__VA_ARGS__)
 
 #ifdef NDEBUG
 #define conn_log_trace(...)
@@ -227,8 +226,9 @@ protected:
 /**
  * Convenience macros for logging with a stream ID and a connection ID.
  */
-#define stream_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, STREAM, ...)                                                \
-  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL) << fmt::format("[C{}][S{}] " FORMAT, (STREAM).connectionId(), (STREAM).streamId(), ##__VA_ARGS__)
+#define stream_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, STREAM, ...)                               \
+  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL) << fmt::format(                                          \
+      "[C{}][S{}] " FORMAT, (STREAM).connectionId(), (STREAM).streamId(), ##__VA_ARGS__)
 
 #ifdef NDEBUG
 #define stream_log_trace(...)
@@ -240,6 +240,7 @@ protected:
   stream_log(VLOG, log(), 1, FORMAT, STREAM, ##__VA_ARGS__)
 #endif
 
-#define stream_log_info(FORMAT, STREAM, ...) stream_log(LOG, log(), INFO, FORMAT, STREAM, ##__VA_ARGS__)
+#define stream_log_info(FORMAT, STREAM, ...)                                                       \
+  stream_log(LOG, log(), INFO, FORMAT, STREAM, ##__VA_ARGS__)
 
 } // Envoy

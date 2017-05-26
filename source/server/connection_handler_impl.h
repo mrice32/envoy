@@ -20,7 +20,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 // clang-format off
 #define ALL_LISTENER_STATS(COUNTER, GAUGE, TIMER)                                                  \

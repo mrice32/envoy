@@ -16,7 +16,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 namespace Network {
 namespace Address {

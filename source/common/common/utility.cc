@@ -8,7 +8,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 std::string DateFormatter::fromTime(const SystemTime& time) {
   return fromTimeT(std::chrono::system_clock::to_time_t(time));

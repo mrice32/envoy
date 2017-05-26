@@ -1,7 +1,5 @@
 // NOLINT(namespace-envoy)
 
-
-
 #include "test/test_common/environment.h"
 #include "test/test_runner.h"
 

@@ -4,7 +4,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 extern const char build_scm_revision[];
 extern const char build_scm_status[];
 

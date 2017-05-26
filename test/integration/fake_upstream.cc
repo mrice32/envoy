@@ -224,13 +224,15 @@ FakeUpstream::FakeUpstream(Network::Address::IpVersion version, uint32_t port,
                            FakeHttpConnection::Type type)
     : FakeUpstream(nullptr, makeTcpListenSocket(version, port), type) {
   LOG(INFO) << fmt::format("starting fake server on port {}. Address version is {}",
-             this->localAddress()->ip()->port(), Network::Test::addressVersionAsString(version));
+                           this->localAddress()->ip()->port(),
+                           Network::Test::addressVersionAsString(version));
 }
 
 FakeUpstream::FakeUpstream(Ssl::ServerContext* ssl_ctx, uint32_t port,
                            FakeHttpConnection::Type type)
     : FakeUpstream(ssl_ctx, makeTcpListenSocket(port), type) {
-  LOG(INFO) << fmt::format("starting fake SSL server on port {}", this->localAddress()->ip()->port());
+  LOG(INFO) << fmt::format("starting fake SSL server on port {}",
+                           this->localAddress()->ip()->port());
 }
 
 FakeUpstream::FakeUpstream(Ssl::ServerContext* ssl_ctx, Network::ListenSocketPtr&& listen_socket,

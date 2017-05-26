@@ -63,11 +63,11 @@ envoy_cc_library(
     name = "logger_lib",
     srcs = ["logger.cc"],
     hdrs = ["logger.h"],
+    external_deps = ["glog"],
     deps = [
         ":macros",
         "//include/envoy/thread:thread_interface",
     ],
-    external_deps = ["glog"],
 )
 
 envoy_cc_library(

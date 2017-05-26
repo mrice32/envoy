@@ -30,7 +30,6 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 namespace Server {
 
@@ -85,7 +84,8 @@ InstanceImpl::InstanceImpl(Options& options, TestHooks& hooks, HotRestart& resta
   try {
     initialize(options, hooks, component_factory);
   } catch (const EnvoyException& e) {
-    LOG(ERROR) << fmt::format("error initializing configuration '{}': {}", options.configPath(), e.what());
+    LOG(ERROR) << fmt::format("error initializing configuration '{}': {}", options.configPath(),
+                              e.what());
     thread_local_.shutdownThread();
     exit(1);
   }
@@ -173,8 +173,8 @@ bool InstanceImpl::healthCheckFailed() { return server_stats_.live_.value() == 0
 
 void InstanceImpl::initialize(Options& options, TestHooks& hooks,
                               ComponentFactory& component_factory) {
-  LOG(WARNING) << fmt::format("initializing epoch {} (hot restart version={})", options.restartEpoch(),
-             restarter_.version());
+  LOG(WARNING) << fmt::format("initializing epoch {} (hot restart version={})",
+                              options.restartEpoch(), restarter_.version());
 
   // Handle configuration that needs to take place prior to the main configuration load.
   Json::ObjectSharedPtr config_json = Json::Factory::loadFromFile(options.configPath());
@@ -253,7 +253,8 @@ void InstanceImpl::initialize(Options& options, TestHooks& hooks,
   });
 
   sig_hup_ = handler_.dispatcher().listenForSignal(SIGHUP, []() -> void {
-    LOG(WARNING) << fmt::format("caught and eating SIGHUP. See documentation for how to hot restart.");
+    LOG(WARNING) << fmt::format(
+        "caught and eating SIGHUP. See documentation for how to hot restart.");
   });
 
   initializeStatSinks();
@@ -287,7 +288,8 @@ void InstanceImpl::startWorkers(TestHooks& hooks) {
       // bind to it above. This happens when there is a race between two applications to listen
       // on the same port. In general if we can't initialize the worker configuration just print
       // the error and exit cleanly without crashing.
-      LOG(ERROR) << fmt::format("shutting down due to error initializing worker configuration: {}", e.what());
+      LOG(ERROR) << fmt::format("shutting down due to error initializing worker configuration: {}",
+                                e.what());
       shutdown();
     }
   }
@@ -383,11 +385,11 @@ void InstanceImpl::run() {
   handler_.closeConnections();
   thread_local_.shutdownThread();
   LOG(WARNING) << fmt::format("exiting");
-  #ifdef GLOG_ON
+#ifdef GLOG_ON
   google::FlushLogFiles(google::INFO);
-  #else
+#else
   log().flush();
-  #endif
+#endif
 }
 
 Runtime::Loader& InstanceImpl::runtime() { return *runtime_loader_; }

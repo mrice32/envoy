@@ -10,14 +10,13 @@
 
 #include "spdlog/spdlog.h"
 
-
 namespace Envoy {
 namespace Server {
 
 ConnectionHandlerImpl::ConnectionHandlerImpl(spdlog::logger& logger, Api::ApiPtr&& api)
     : logger_(logger), api_(std::move(api)), dispatcher_(api_->allocateDispatcher()) {
-      UNREFERENCED_PARAMETER(logger_);
-    }
+  UNREFERENCED_PARAMETER(logger_);
+}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() { closeConnections(); }
 

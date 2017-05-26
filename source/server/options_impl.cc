@@ -9,7 +9,6 @@
 #include "common/common/version.h"
 
 #include "spdlog/spdlog.h"
-
 #include "tclap/CmdLine.h"
 
 namespace Envoy {
