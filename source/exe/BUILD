@@ -52,23 +52,10 @@ envoy_cc_library(
 
 envoy_cc_library(
     name = "envoy_main_lib",
-    srcs = ["main.cc"],
+    srcs = ["omain.cc"],
     deps = [
         "//source/common/common:compiler_requirements_lib",
-        ":envoy_common_lib",
-        ":hot_restart_lib",
-    ] + select({
-        "//bazel:disable_signal_trace": [],
-        "//conditions:default": [":sigaction_lib"],
-    }),
-)
-
-envoy_cc_library(
-    name = "envoy_main_lib",
-    srcs = ["main.cc"],
-    deps = [
-        "//source/common/common:compiler_requirements_lib",
-    ]
+    ],
     external_deps = ["glog"],
 )
 
