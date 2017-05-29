@@ -64,6 +64,15 @@ envoy_cc_library(
 )
 
 envoy_cc_library(
+    name = "envoy_main_lib",
+    srcs = ["main.cc"],
+    deps = [
+        "//source/common/common:compiler_requirements_lib",
+    ]
+    external_deps = ["glog"],
+)
+
+envoy_cc_library(
     name = "hot_restart_lib",
     srcs = ["hot_restart.cc"],
     hdrs = ["hot_restart.h"],
