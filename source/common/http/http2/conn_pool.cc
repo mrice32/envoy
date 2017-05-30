@@ -57,7 +57,7 @@ void ConnPoolImpl::checkForDrained() {
   }
 
   if (drained) {
-    log_debug("invoking drained callbacks");
+    VLOG(1) << fmt::format("invoking drained callbacks");
     for (const DrainedCb& cb : drained_callbacks_) {
       cb();
     }
@@ -83,7 +83,7 @@ ConnectionPool::Cancellable* ConnPoolImpl::newStream(Http::StreamDecoder& respon
   }
 
   if (!host_->cluster().resourceManager(priority_).requests().canCreate()) {
-    log_debug("max requests overflow");
+    VLOG(1) << fmt::format("max requests overflow");
     callbacks.onPoolFailure(ConnectionPool::PoolFailureReason::Overflow, nullptr);
     host_->cluster().stats().upstream_rq_pending_overflow_.inc();
   } else {

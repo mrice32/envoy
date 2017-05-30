@@ -38,7 +38,7 @@ CdsApiImpl::CdsApiImpl(const Json::Object& config, ClusterManager& cm,
 }
 
 void CdsApiImpl::createRequest(Http::Message& request) {
-  log_debug("cds: starting request");
+  VLOG(1) << fmt::format("cds: starting request");
   stats_.update_attempt_.inc();
   request.headers().insertMethod().value(Http::Headers::get().MethodValues.Get);
   request.headers().insertPath().value(
@@ -46,7 +46,7 @@ void CdsApiImpl::createRequest(Http::Message& request) {
 }
 
 void CdsApiImpl::parseResponse(const Http::Message& response) {
-  log_debug("cds: parsing response");
+  VLOG(1) << fmt::format("cds: parsing response");
   Json::ObjectSharedPtr response_json = Json::Factory::loadFromString(response.bodyAsString());
   response_json->validateSchema(Json::Schema::CDS_SCHEMA);
   std::vector<Json::ObjectSharedPtr> clusters = response_json->getObjectArray("clusters");

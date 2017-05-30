@@ -58,7 +58,7 @@ void ConnPoolImpl::checkForDrained() {
 }
 
 void ConnPoolImpl::createNewConnection() {
-  log_debug("creating a new connection");
+  VLOG(1) << fmt::format("creating a new connection");
   ActiveClientPtr client(new ActiveClient(*this));
   client->moveIntoList(std::move(client), busy_clients_);
 }
@@ -84,12 +84,12 @@ ConnectionPool::Cancellable* ConnPoolImpl::newStream(StreamDecoder& response_dec
       createNewConnection();
     }
 
-    log_debug("queueing request due to no available connections");
+    VLOG(1) << fmt::format("queueing request due to no available connections");
     PendingRequestPtr pending_request(new PendingRequest(*this, response_decoder, callbacks));
     pending_request->moveIntoList(std::move(pending_request), pending_requests_);
     return pending_requests_.front().get();
   } else {
-    log_debug("max pending requests overflow");
+    VLOG(1) << fmt::format("max pending requests overflow");
     callbacks.onPoolFailure(ConnectionPool::PoolFailureReason::Overflow, nullptr);
     host_->cluster().stats().upstream_rq_pending_overflow_.inc();
     return nullptr;
@@ -172,7 +172,7 @@ void ConnPoolImpl::onDownstreamReset(ActiveClient& client) {
 }
 
 void ConnPoolImpl::onPendingRequestCancel(PendingRequest& request) {
-  log_debug("cancelling pending request");
+  VLOG(1) << fmt::format("cancelling pending request");
   request.removeFromList(pending_requests_);
   host_->cluster().stats().upstream_rq_cancelled_.inc();
   checkForDrained();

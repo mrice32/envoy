@@ -76,7 +76,7 @@ Router::ConfigConstSharedPtr RdsRouteConfigProviderImpl::config() {
 }
 
 void RdsRouteConfigProviderImpl::createRequest(Http::Message& request) {
-  log_debug("rds: starting request");
+  VLOG(1) << fmt::format("rds: starting request");
   stats_.update_attempt_.inc();
   request.headers().insertMethod().value(Http::Headers::get().MethodValues.Get);
   request.headers().insertPath().value(fmt::format("/v1/routes/{}/{}/{}", route_config_name_,
@@ -85,7 +85,7 @@ void RdsRouteConfigProviderImpl::createRequest(Http::Message& request) {
 }
 
 void RdsRouteConfigProviderImpl::parseResponse(const Http::Message& response) {
-  log_debug("rds: parsing response");
+  VLOG(1) << fmt::format("rds: parsing response");
   Json::ObjectSharedPtr response_json = Json::Factory::loadFromString(response.bodyAsString());
   uint64_t new_hash = response_json->hash();
   if (new_hash != last_config_hash_ || !initialized_) {
@@ -94,7 +94,7 @@ void RdsRouteConfigProviderImpl::parseResponse(const Http::Message& response) {
     initialized_ = true;
     last_config_hash_ = new_hash;
     stats_.config_reload_.inc();
-    log_debug("rds: loading new configuration: config_name={} hash={}", route_config_name_,
+    VLOG(1) << fmt::format("rds: loading new configuration: config_name={} hash={}", route_config_name_,
               new_hash);
     tls_.runOnAllThreads([this, new_config]() -> void {
       tls_.getTyped<ThreadLocalConfig>(tls_slot_).config_ = new_config;

@@ -31,7 +31,7 @@ bool DrainManagerImpl::drainClose() {
 }
 
 void DrainManagerImpl::drainSequenceTick() {
-  log_trace("drain tick #{}", drain_time_completed_.count());
+  VLOG(2) << fmt::format("drain tick #{}", drain_time_completed_.count());
   ASSERT(drain_time_completed_ < server_.options().drainTime());
   drain_time_completed_ += std::chrono::seconds(1);
 

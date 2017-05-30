@@ -195,14 +195,6 @@ protected:
 
 } // Logger
 
-#ifdef NDEBUG
-#define log_trace(...)
-#define log_debug(...)
-#else
-#define log_trace(...) VLOG(2) << fmt::format(__VA_ARGS__)
-#define log_debug(...) VLOG(1) << fmt::format(__VA_ARGS__)
-#endif
-
 /**
  * Convenience macros for logging with connection ID.
  */

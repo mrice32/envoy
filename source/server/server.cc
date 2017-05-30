@@ -113,7 +113,7 @@ void InstanceImpl::failHealthcheck(bool fail) {
 }
 
 void InstanceImpl::flushStats() {
-  log_debug("flushing stats");
+  VLOG(1) << fmt::format("flushing stats");
   HotRestart::GetParentStatsInfo info;
   restarter_.getParentStats(info);
   server_stats_.uptime_.set(time(nullptr) - original_start_time_);

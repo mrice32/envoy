@@ -85,12 +85,12 @@ bool AdminImpl::changeLogLevel(const Http::Utility::QueryParams& params) {
 
   // Now either change all levels or a single level.
   if (name == "level") {
-    log_debug("change all log levels: level='{}'", level);
+    VLOG(1) << fmt::format("change all log levels: level='{}'", level);
     for (const Logger::Logger& logger : Logger::Registry::loggers()) {
       logger.setLevel(static_cast<spdlog::level::level_enum>(level_to_use));
     }
   } else {
-    log_debug("change log level: name='{}' level='{}'", name, level);
+    VLOG(1) << fmt::format("change log level: name='{}' level='{}'", name, level);
     const Logger::Logger* logger_to_change = nullptr;
     for (const Logger::Logger& logger : Logger::Registry::loggers()) {
       if (logger.name() == name) {
