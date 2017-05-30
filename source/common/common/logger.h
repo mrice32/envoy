@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "envoy/thread/thread.h"
-
 #include "common/common/macros.h"
 
 #include "spdlog/spdlog.h"
@@ -71,6 +70,41 @@ enum class Id {
 
 #define VLOG_TO_OBJECT(LOG, LEVEL) VLOG(LEVEL)
 
+#define SINK_LOG(SINK, LEVEL) LOG_TO_SINK_BUT_NOT_TO_LOGFILE(SINK, LEVEL)
+
+#define SINK_VLOG(SINK, LEVEL) (!VLOG_IS_ON(LEVEL)) ? (void) 0 : google::LogMessageVoidify() & LOG_TO_SINK_BUT_NOT_TO_LOGFILE(SINK, INFO)
+
+
+class Logger { 
+  public:
+  std::string levelString() const { return spdlog::level::level_names[logger_->level()]; }
+  std::string name() const { return logger_->name(); }
+  void setLevel(spdlog::level::level_enum level) const { logger_->set_level(level); }
+  LogSink &sink();
+
+private:
+  Logger(const std::string& name);
+
+  friend class Registry;
+};
+
+class LockingStderrSink : public google::LogSink {
+public:
+  void setLock(Thread::BasicLockable& lock) { lock_ = &lock; }
+  void send(google::LogSeverity severity, const char* full_filename,
+                    const char* base_filename, int line,
+                    const struct ::tm* tm_time,
+                    const char* message, size_t message_len) override {
+    UNREFERENCED_PARAMETER(full_filename);
+    Thread::OptionalLockGuard<Thread::BasicLockable> guard(lock_);
+    std::cerr << ToString(severity, base_filename, line, tm_time, message, message_len) << std::endl;
+  }
+
+private:
+  Thread::BasicLockable* lock_{};
+};
+
+
 #else
 
 class SpdLogStream {
@@ -120,25 +154,13 @@ private:
 
 #define VLOG(LEVEL) VLOG_TO_OBJECT(log(), LEVEL)
 
-#endif
+#define SINK_LOG(SINK, LEVEL) LOG_TO_OBJECT(SINK, LEVEL)
 
-
-class Logger { 
-  public:
-  std::string levelString() const { return spdlog::level::level_names[logger_->level()]; }
-  std::string name() const { return logger_->name(); }
-  void setLevel(spdlog::level::level_enum level) const { logger_->set_level(level); }
-  LogSink &sink();
-
-private:
-  Logger(const std::string& name);
-
-  friend class Registry;
-};
+#define SINK_VLOG(SINK, LEVEL) VLOG_TO_OBJECT(SINK, LEVEL)
 
 
 
-/**
+  /**
  * Logger wrapper for a spdlog logger.
  */
 class Logger {
@@ -156,6 +178,7 @@ private:
   friend class Registry;
 };
 
+
 /**
  * An optionally locking stderr logging sink.
  */
@@ -170,6 +193,8 @@ public:
 private:
   Thread::BasicLockable* lock_{};
 };
+
+#endif
 
 /**
  * A registry of all named loggers in envoy. Usable for adjusting levels of each logger
