@@ -317,7 +317,7 @@ Http::Code AdminImpl::handlerCerts(const std::string&, Buffer::Instance& respons
 
 void AdminFilter::onComplete() {
   std::string path = request_headers_->Path()->value().c_str();
-  stream_log_info("request complete: path: {}", *callbacks_, path);
+  LOG(INFO) << format_stream_log("request complete: path: {}", *callbacks_, path);
 
   Buffer::OwnedImpl response;
   Http::Code code = parent_.runCallback(path, response);

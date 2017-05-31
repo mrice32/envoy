@@ -67,7 +67,7 @@ ConnectionPool::Cancellable* ConnPoolImpl::newStream(StreamDecoder& response_dec
                                                      ConnectionPool::Callbacks& callbacks) {
   if (!ready_clients_.empty()) {
     ready_clients_.front()->moveBetweenLists(ready_clients_, busy_clients_);
-    conn_log_debug("using existing connection", *busy_clients_.front()->codec_client_);
+    VLOG(1) << format_connection_log("using existing connection", *busy_clients_.front()->codec_client_);
     attachRequestToClient(*busy_clients_.front(), response_decoder, callbacks);
     return nullptr;
   }
@@ -100,7 +100,7 @@ void ConnPoolImpl::onConnectionEvent(ActiveClient& client, uint32_t events) {
   if ((events & Network::ConnectionEvent::RemoteClose) ||
       (events & Network::ConnectionEvent::LocalClose)) {
     // The client died.
-    conn_log_debug("client disconnected", *client.codec_client_);
+    VLOG(1) << format_connection_log("client disconnected", *client.codec_client_);
     ActiveClientPtr removed;
     bool check_for_drained = true;
     if (client.stream_wrapper_) {
@@ -179,15 +179,15 @@ void ConnPoolImpl::onPendingRequestCancel(PendingRequest& request) {
 }
 
 void ConnPoolImpl::onResponseComplete(ActiveClient& client) {
-  conn_log_debug("response complete", *client.codec_client_);
+  VLOG(1) << format_connection_log("response complete", *client.codec_client_);
   if (!client.stream_wrapper_->encode_complete_) {
-    conn_log_debug("response before request complete", *client.codec_client_);
+    VLOG(1) << format_connection_log("response before request complete", *client.codec_client_);
     onDownstreamReset(client);
   } else if (client.stream_wrapper_->saw_close_header_ || client.codec_client_->remoteClosed()) {
-    conn_log_debug("saw upstream connection: close", *client.codec_client_);
+    VLOG(1) << format_connection_log("saw upstream connection: close", *client.codec_client_);
     onDownstreamReset(client);
   } else if (client.remaining_requests_ > 0 && --client.remaining_requests_ == 0) {
-    conn_log_debug("maximum requests per connection", *client.codec_client_);
+    VLOG(1) << format_connection_log("maximum requests per connection", *client.codec_client_);
     host_->cluster().stats().upstream_cx_max_requests_.inc();
     onDownstreamReset(client);
   } else {
@@ -199,12 +199,12 @@ void ConnPoolImpl::processIdleClient(ActiveClient& client) {
   client.stream_wrapper_.reset();
   if (pending_requests_.empty()) {
     // There is nothing to service so just move the connection into the ready list.
-    conn_log_debug("moving to ready", *client.codec_client_);
+    VLOG(1) << format_connection_log("moving to ready", *client.codec_client_);
     client.moveBetweenLists(busy_clients_, ready_clients_);
   } else {
     // There is work to do so bind a request to the client and move it to the busy list. Pending
     // requests are pushed onto the front, so pull from the back.
-    conn_log_debug("attaching to next request", *client.codec_client_);
+    VLOG(1) << format_connection_log("attaching to next request", *client.codec_client_);
     attachRequestToClient(client, pending_requests_.back()->decoder_,
                           pending_requests_.back()->callbacks_);
     pending_requests_.pop_back();
@@ -297,7 +297,7 @@ ConnPoolImpl::ActiveClient::~ActiveClient() {
 void ConnPoolImpl::ActiveClient::onConnectTimeout() {
   // We just close the client at this point. This will result in both a timeout and a connect
   // failure and will fold into all the normal connect failure logic.
-  conn_log_debug("connect timeout", *codec_client_);
+  VLOG(1) << format_connection_log("connect timeout", *codec_client_);
   parent_.host_->cluster().stats().upstream_cx_connect_timeout_.inc();
   codec_client_->close();
 }

@@ -262,7 +262,7 @@ ConnectionImpl::ConnectionImpl(Network::Connection& connection, http_parser_type
 }
 
 void ConnectionImpl::completeLastHeader() {
-  conn_log_trace("completed header: key={} value={}", connection_, current_header_field_.c_str(),
+  VLOG(2) << format_connection_log("completed header: key={} value={}", connection_, current_header_field_.c_str(),
                  current_header_value_.c_str());
   if (!current_header_field_.empty()) {
     toLowerTable().toLowerCase(current_header_field_.buffer(), current_header_field_.size());
@@ -276,7 +276,7 @@ void ConnectionImpl::completeLastHeader() {
 }
 
 void ConnectionImpl::dispatch(Buffer::Instance& data) {
-  conn_log_trace("parsing {} bytes", connection_, data.length());
+  VLOG(2) << format_connection_log("parsing {} bytes", connection_, data.length());
 
   // Always unpause before dispatch.
   http_parser_pause(&parser_, 0);
@@ -293,7 +293,7 @@ void ConnectionImpl::dispatch(Buffer::Instance& data) {
     dispatchSlice(nullptr, 0);
   }
 
-  conn_log_trace("parsed {} bytes", connection_, total_parsed);
+  VLOG(2) << format_connection_log("parsed {} bytes", connection_, total_parsed);
   data.drain(total_parsed);
 }
 
@@ -332,7 +332,7 @@ void ConnectionImpl::onHeaderValue(const char* data, size_t length) {
 }
 
 int ConnectionImpl::onHeadersCompleteBase() {
-  conn_log_trace("headers complete", connection_);
+  VLOG(2) << format_connection_log("headers complete", connection_);
   completeLastHeader();
   if (!(parser_.http_major == 1 && parser_.http_minor == 1)) {
     // This is not necessarily true, but it's good enough since higher layers only care if this is
@@ -436,7 +436,7 @@ void ServerConnectionImpl::onUrl(const char* data, size_t length) {
 void ServerConnectionImpl::onBody(const char* data, size_t length) {
   ASSERT(!deferred_end_stream_headers_);
   if (active_request_) {
-    conn_log_trace("body size={}", connection_, length);
+    VLOG(2) << format_connection_log("body size={}", connection_, length);
     Buffer::OwnedImpl buffer(data, length);
     active_request_->request_decoder_->decodeData(buffer, false);
   }
@@ -444,7 +444,7 @@ void ServerConnectionImpl::onBody(const char* data, size_t length) {
 
 void ServerConnectionImpl::onMessageComplete() {
   if (active_request_) {
-    conn_log_trace("message complete", connection_);
+    VLOG(2) << format_connection_log("message complete", connection_);
     Buffer::OwnedImpl buffer;
     active_request_->remote_complete_ = true;
 

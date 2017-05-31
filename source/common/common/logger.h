@@ -195,44 +195,17 @@ protected:
 
 } // Logger
 
-/**
- * Convenience macros for logging with connection ID.
- */
-#define conn_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, CONNECTION, ...)                             \
-  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL)                                                          \
-      << fmt::format("[C{}] " FORMAT, (CONNECTION).id(), ##__VA_ARGS__)
+// Function for formatting the connection log
+template<typename T, typename... Args>
+std::string format_connection_log(const std::string &format, T &connection, Args&&... args)
+{
+  return fmt::format("[C{}] " + format, connection.id(), std::forward<Args>(args)...);
+}
 
-#ifdef NDEBUG
-#define conn_log_trace(...)
-#define conn_log_debug(...)
-#else
-#define conn_log_trace(FORMAT, CONNECTION, ...)                                                    \
-  conn_log(VLOG, log(), 2, FORMAT, CONNECTION, ##__VA_ARGS__)
-#define conn_log_debug(FORMAT, CONNECTION, ...)                                                    \
-  conn_log(VLOG, log(), 1, FORMAT, CONNECTION, ##__VA_ARGS__)
-#endif
-
-#define conn_log_info(FORMAT, CONNECTION, ...)                                                     \
-  conn_log(LOG, log(), INFO, FORMAT, CONNECTION, ##__VA_ARGS__)
-
-/**
- * Convenience macros for logging with a stream ID and a connection ID.
- */
-#define stream_log(LOG_TYPE, LOG_OBJECT, LEVEL, FORMAT, STREAM, ...)                               \
-  LOG_TYPE##_TO_OBJECT(LOG_OBJECT, LEVEL) << fmt::format(                                          \
-      "[C{}][S{}] " FORMAT, (STREAM).connectionId(), (STREAM).streamId(), ##__VA_ARGS__)
-
-#ifdef NDEBUG
-#define stream_log_trace(...)
-#define stream_log_debug(...)
-#else
-#define stream_log_trace(FORMAT, STREAM, ...)                                                      \
-  stream_log(VLOG, log(), 2, FORMAT, STREAM, ##__VA_ARGS__)
-#define stream_log_debug(FORMAT, STREAM, ...)                                                      \
-  stream_log(VLOG, log(), 1, FORMAT, STREAM, ##__VA_ARGS__)
-#endif
-
-#define stream_log_info(FORMAT, STREAM, ...)                                                       \
-  stream_log(LOG, log(), INFO, FORMAT, STREAM, ##__VA_ARGS__)
-
+// Function for formatting the stream log
+template<typename T, typename... Args>
+std::string format_stream_log(const std::string &format, T &stream, Args&&... args)
+{
+  return fmt::format("[C{}][S{}] " + format, stream.connectionId(), stream.streamId(), std::forward<Args>(args)...);
+}
 } // Envoy

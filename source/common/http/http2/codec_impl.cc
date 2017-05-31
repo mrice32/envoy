@@ -224,7 +224,7 @@ void ConnectionImpl::StreamImpl::resetStreamWorker(StreamResetReason reason) {
 ConnectionImpl::~ConnectionImpl() { nghttp2_session_del(session_); }
 
 void ConnectionImpl::dispatch(Buffer::Instance& data) {
-  conn_log_trace("dispatching {} bytes", connection_, data.length());
+  VLOG(2) << format_connection_log("dispatching {} bytes", connection_, data.length());
   uint64_t num_slices = data.getRawSlices(nullptr, 0);
   Buffer::RawSlice slices[num_slices];
   data.getRawSlices(slices, num_slices);
@@ -239,7 +239,7 @@ void ConnectionImpl::dispatch(Buffer::Instance& data) {
     dispatching_ = false;
   }
 
-  conn_log_trace("dispatched {} bytes", connection_, data.length());
+  VLOG(2) << format_connection_log("dispatched {} bytes", connection_, data.length());
   data.drain(data.length());
 
   // Decoding incoming frames can generate outbound frames so flush pending.
@@ -274,7 +274,7 @@ void ConnectionImpl::shutdownNotice() {
 }
 
 int ConnectionImpl::onFrameReceived(const nghttp2_frame* frame) {
-  conn_log_trace("recv frame type={}", connection_, static_cast<uint64_t>(frame->hd.type));
+  VLOG(2) << format_connection_log("recv frame type={}", connection_, static_cast<uint64_t>(frame->hd.type));
 
   // Only raise GOAWAY once, since we don't currently expose stream information. Shutdown
   // notifications are the same as a normal GOAWAY.
@@ -373,7 +373,7 @@ int ConnectionImpl::onFrameReceived(const nghttp2_frame* frame) {
     break;
   }
   case NGHTTP2_RST_STREAM: {
-    conn_log_trace("remote reset: {}", connection_, frame->rst_stream.error_code);
+    VLOG(2) << format_connection_log("remote reset: {}", connection_, frame->rst_stream.error_code);
     stats_.rx_reset_.inc();
     break;
   }
@@ -387,7 +387,7 @@ int ConnectionImpl::onFrameSend(const nghttp2_frame* frame) {
   // data from our peer. Sometimes it raises the invalid frame callback, and sometimes it does not.
   // In all cases however it will attempt to send a GOAWAY frame with an error status. If we see
   // an outgoing frame of this type, we will return an error code so that we can abort execution.
-  conn_log_trace("sent frame type={}", connection_, static_cast<uint64_t>(frame->hd.type));
+  VLOG(2) << format_connection_log("sent frame type={}", connection_, static_cast<uint64_t>(frame->hd.type));
   switch (frame->hd.type) {
   case NGHTTP2_GOAWAY: {
     if (frame->goaway.error_code != NGHTTP2_NO_ERROR) {
@@ -397,7 +397,7 @@ int ConnectionImpl::onFrameSend(const nghttp2_frame* frame) {
   }
 
   case NGHTTP2_RST_STREAM: {
-    conn_log_debug("sent reset code={}", connection_, frame->rst_stream.error_code);
+    VLOG(1) << format_connection_log("sent reset code={}", connection_, frame->rst_stream.error_code);
     stats_.tx_reset_.inc();
     break;
   }
@@ -416,14 +416,14 @@ int ConnectionImpl::onFrameSend(const nghttp2_frame* frame) {
 int ConnectionImpl::onInvalidFrame(int error_code) {
   UNREFERENCED_PARAMETER(error_code);
 
-  conn_log_debug("invalid frame: {}", connection_, nghttp2_strerror(error_code));
+  VLOG(1) << format_connection_log("invalid frame: {}", connection_, nghttp2_strerror(error_code));
   // Cause dispatch to return with an error code.
   return NGHTTP2_ERR_CALLBACK_FAILURE;
 }
 
 ssize_t ConnectionImpl::onSend(const uint8_t* data, size_t length) {
   // TODO(mattklein123): Back pressure.
-  conn_log_trace("send data: bytes={}", connection_, length);
+  VLOG(2) << format_connection_log("send data: bytes={}", connection_, length);
   Buffer::OwnedImpl buffer(data, length);
   connection_.write(buffer);
   return length;
@@ -434,7 +434,7 @@ int ConnectionImpl::onStreamClose(int32_t stream_id, uint32_t error_code) {
 
   StreamImpl* stream = getStream(stream_id);
   if (stream) {
-    conn_log_debug("stream closed: {}", connection_, error_code);
+    VLOG(1) << format_connection_log("stream closed: {}", connection_, error_code);
     if (!stream->remote_end_stream_ || !stream->local_end_stream_) {
       stream->runResetCallbacks(error_code == NGHTTP2_REFUSED_STREAM
                                     ? StreamResetReason::RemoteRefusedStreamReset
@@ -513,7 +513,7 @@ void ConnectionImpl::sendSettings(uint64_t codec_options) {
 
   if (codec_options & CodecOptions::NoCompression) {
     iv.push_back({NGHTTP2_SETTINGS_HEADER_TABLE_SIZE, 0});
-    conn_log_debug("disabling header compression", connection_);
+    VLOG(1) << format_connection_log("disabling header compression", connection_);
   }
 
   int rc = nghttp2_submit_settings(session_, NGHTTP2_FLAG_NONE, &iv[0], iv.size());
