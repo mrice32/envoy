@@ -16,6 +16,7 @@ envoy_cc_test_library(
     ],
     external_deps = [
         "protobuf",
+        "glog",
     ],
     deps = [
         "//source/common/common:thread_lib",

@@ -23,6 +23,10 @@
 #include "ares.h"
 #include "spdlog/spdlog.h"
 
+#ifdef GLOG_ON
+#include "glog/logging.h"
+#endif
+
 namespace Envoy {
 namespace Server {
 
@@ -47,6 +51,11 @@ int main(int argc, char** argv) {
   // Enabled by default. Control with "bazel --define=signal_trace=disabled"
   Envoy::SignalAction handle_sigs;
 #endif
+
+#ifdef GLOG_ON
+  google::InitGoogleLogging(argv[0]);
+#endif
+
   Envoy::Event::Libevent::Global::initialize();
   Envoy::OptionsImpl options(argc, argv, Envoy::Server::SharedMemory::version(),
                              spdlog::level::warn);

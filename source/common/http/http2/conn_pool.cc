@@ -57,7 +57,7 @@ void ConnPoolImpl::checkForDrained() {
   }
 
   if (drained) {
-    log_debug("invoking drained callbacks");
+    VLOG(1) << fmt::format("invoking drained callbacks");
     for (const DrainedCb& cb : drained_callbacks_) {
       cb();
     }
@@ -83,11 +83,11 @@ ConnectionPool::Cancellable* ConnPoolImpl::newStream(Http::StreamDecoder& respon
   }
 
   if (!host_->cluster().resourceManager(priority_).requests().canCreate()) {
-    log_debug("max requests overflow");
+    VLOG(1) << fmt::format("max requests overflow");
     callbacks.onPoolFailure(ConnectionPool::PoolFailureReason::Overflow, nullptr);
     host_->cluster().stats().upstream_rq_pending_overflow_.inc();
   } else {
-    conn_log_debug("creating stream", *primary_client_->client_);
+    VLOG(1) << format_connection_log("creating stream", *primary_client_->client_);
     primary_client_->total_streams_++;
     host_->stats().rq_total_.inc();
     host_->stats().rq_active_.inc();
@@ -115,10 +115,10 @@ void ConnPoolImpl::onConnectionEvent(ActiveClient& client, uint32_t events) {
     }
 
     if (&client == primary_client_.get()) {
-      conn_log_debug("destroying primary client", *client.client_);
+      VLOG(1) << format_connection_log("destroying primary client", *client.client_);
       dispatcher_.deferredDelete(std::move(primary_client_));
     } else {
-      conn_log_debug("destroying draining client", *client.client_);
+      VLOG(1) << format_connection_log("destroying draining client", *client.client_);
       dispatcher_.deferredDelete(std::move(draining_client_));
     }
 
@@ -143,7 +143,7 @@ void ConnPoolImpl::onConnectionEvent(ActiveClient& client, uint32_t events) {
 }
 
 void ConnPoolImpl::movePrimaryClientToDraining() {
-  conn_log_debug("moving primary to draining", *primary_client_->client_);
+  VLOG(1) << format_connection_log("moving primary to draining", *primary_client_->client_);
   if (draining_client_) {
     // This should pretty much never happen, but is possible if we start draining and then get
     // a goaway for example. In this case just kill the current draining connection. It's not
@@ -164,21 +164,21 @@ void ConnPoolImpl::movePrimaryClientToDraining() {
 }
 
 void ConnPoolImpl::onConnectTimeout(ActiveClient& client) {
-  conn_log_debug("connect timeout", *client.client_);
+  VLOG(1) << format_connection_log("connect timeout", *client.client_);
   host_->cluster().stats().upstream_cx_connect_timeout_.inc();
   client.client_->close();
 }
 
 void ConnPoolImpl::onGoAway(ActiveClient& client) {
-  conn_log_debug("remote goaway", *client.client_);
+  VLOG(1) << format_connection_log("remote goaway", *client.client_);
   if (&client == primary_client_.get()) {
     movePrimaryClientToDraining();
   }
 }
 
 void ConnPoolImpl::onStreamDestroy(ActiveClient& client) {
-  conn_log_debug("destroying stream: {} remaining", *client.client_,
-                 client.client_->numActiveRequests());
+  VLOG(1) << format_connection_log("destroying stream: {} remaining", *client.client_,
+                                   client.client_->numActiveRequests());
   host_->stats().rq_active_.dec();
   host_->cluster().stats().upstream_rq_active_.dec();
   host_->cluster().resourceManager(priority_).requests().dec();

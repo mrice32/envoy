@@ -22,6 +22,7 @@ envoy_cc_test_library(
         "router.h",
         "router_check.cc",
     ],
+    external_deps = ["glog"],
     deps = [
         "//source/common/http:header_map_lib",
         "//source/common/http:headers_lib",

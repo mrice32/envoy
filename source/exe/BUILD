@@ -55,6 +55,7 @@ envoy_cc_library(
 envoy_cc_library(
     name = "envoy_main_lib",
     srcs = ["main.cc"],
+    external_deps = ["glog"],
     deps = [
         "//source/common/common:compiler_requirements_lib",
         ":envoy_common_lib",
