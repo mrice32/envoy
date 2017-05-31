@@ -265,7 +265,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
 
       if (pending_integer_.integer_ == 0) {
         VLOG(2) << fmt::format("parse slice: BulkStringBody complete: {}",
-                  pending_value_stack_.front().value_->asString());
+                               pending_value_stack_.front().value_->asString());
         state_ = State::CR;
       }
 

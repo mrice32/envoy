@@ -51,7 +51,8 @@ void ConnectionHandlerImpl::closeListeners() {
 }
 
 void ConnectionHandlerImpl::removeConnection(ActiveConnection& connection) {
-  LOG_TO_OBJECT(logger_, INFO) << format_connection_log("adding to cleanup list", *connection.connection_);
+  LOG_TO_OBJECT(logger_, INFO) << format_connection_log("adding to cleanup list",
+                                                        *connection.connection_);
   ActiveConnectionPtr removed = connection.removeFromList(connections_);
   dispatcher_->deferredDelete(std::move(removed));
   num_connections_--;
@@ -117,7 +118,8 @@ void ConnectionHandlerImpl::ActiveListener::onNewConnection(
     // Close the connection if the filter chain is empty to avoid leaving open connections
     // with nothing to do.
     if (empty_filter_chain) {
-      LOG_TO_OBJECT(parent_.logger_, INFO) << format_connection_log("closing connection: no filters", *new_connection);
+      LOG_TO_OBJECT(parent_.logger_, INFO)
+          << format_connection_log("closing connection: no filters", *new_connection);
       new_connection->close(Network::ConnectionCloseType::NoFlush);
     } else {
       ActiveConnectionPtr active_connection(

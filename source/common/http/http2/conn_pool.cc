@@ -178,7 +178,7 @@ void ConnPoolImpl::onGoAway(ActiveClient& client) {
 
 void ConnPoolImpl::onStreamDestroy(ActiveClient& client) {
   VLOG(1) << format_connection_log("destroying stream: {} remaining", *client.client_,
-                 client.client_->numActiveRequests());
+                                   client.client_->numActiveRequests());
   host_->stats().rq_active_.dec();
   host_->cluster().stats().upstream_rq_active_.dec();
   host_->cluster().resourceManager(priority_).requests().dec();

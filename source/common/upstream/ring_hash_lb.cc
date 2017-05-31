@@ -101,7 +101,8 @@ void RingHashLoadBalancer::Ring::create(Runtime::Loader& runtime,
     }
   }
 
-  VLOG(2) << fmt::format("ring hash: min_ring_size={} hashes_per_host={}", min_ring_size, hashes_per_host);
+  VLOG(2) << fmt::format("ring hash: min_ring_size={} hashes_per_host={}", min_ring_size,
+                         hashes_per_host);
   ring_.reserve(hosts.size() * hashes_per_host);
   for (const auto& host : hosts) {
     for (uint64_t i = 0; i < hashes_per_host; i++) {
@@ -116,7 +117,8 @@ void RingHashLoadBalancer::Ring::create(Runtime::Loader& runtime,
                                             -> bool { return lhs.hash_ < rhs.hash_; });
 #ifndef NDEBUG
   for (auto entry : ring_) {
-    VLOG(2) << fmt::format("ring hash: host={} hash={}", entry.host_->address()->asString(), entry.hash_);
+    VLOG(2) << fmt::format("ring hash: host={} hash={}", entry.host_->address()->asString(),
+                           entry.hash_);
   }
 #endif
 }

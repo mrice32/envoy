@@ -67,7 +67,8 @@ ConnectionPool::Cancellable* ConnPoolImpl::newStream(StreamDecoder& response_dec
                                                      ConnectionPool::Callbacks& callbacks) {
   if (!ready_clients_.empty()) {
     ready_clients_.front()->moveBetweenLists(ready_clients_, busy_clients_);
-    VLOG(1) << format_connection_log("using existing connection", *busy_clients_.front()->codec_client_);
+    VLOG(1) << format_connection_log("using existing connection",
+                                     *busy_clients_.front()->codec_client_);
     attachRequestToClient(*busy_clients_.front(), response_decoder, callbacks);
     return nullptr;
   }

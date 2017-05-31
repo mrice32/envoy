@@ -94,8 +94,8 @@ void RdsRouteConfigProviderImpl::parseResponse(const Http::Message& response) {
     initialized_ = true;
     last_config_hash_ = new_hash;
     stats_.config_reload_.inc();
-    VLOG(1) << fmt::format("rds: loading new configuration: config_name={} hash={}", route_config_name_,
-              new_hash);
+    VLOG(1) << fmt::format("rds: loading new configuration: config_name={} hash={}",
+                           route_config_name_, new_hash);
     tls_.runOnAllThreads([this, new_config]() -> void {
       tls_.getTyped<ThreadLocalConfig>(tls_slot_).config_ = new_config;
     });

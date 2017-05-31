@@ -262,8 +262,8 @@ ConnectionImpl::ConnectionImpl(Network::Connection& connection, http_parser_type
 }
 
 void ConnectionImpl::completeLastHeader() {
-  VLOG(2) << format_connection_log("completed header: key={} value={}", connection_, current_header_field_.c_str(),
-                 current_header_value_.c_str());
+  VLOG(2) << format_connection_log("completed header: key={} value={}", connection_,
+                                   current_header_field_.c_str(), current_header_value_.c_str());
   if (!current_header_field_.empty()) {
     toLowerTable().toLowerCase(current_header_field_.buffer(), current_header_field_.size());
     current_header_map_->addViaMove(std::move(current_header_field_),

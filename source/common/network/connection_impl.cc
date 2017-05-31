@@ -92,7 +92,8 @@ void ConnectionImpl::close(ConnectionCloseType type) {
   }
 
   uint64_t data_to_write = write_buffer_.length();
-  VLOG(1) << format_connection_log("closing data_to_write={} type={}", *this, data_to_write, enumToInt(type));
+  VLOG(1) << format_connection_log("closing data_to_write={} type={}", *this, data_to_write,
+                                   enumToInt(type));
   if (data_to_write == 0 || type == ConnectionCloseType::NoFlush) {
     if (data_to_write > 0) {
       // We aren't going to wait to flush, but try to write as much as we can if there is pending
@@ -187,7 +188,8 @@ void ConnectionImpl::onRead(uint64_t read_buffer_size) {
 void ConnectionImpl::readDisable(bool disable) {
   bool read_enabled = readEnabled();
   UNREFERENCED_PARAMETER(read_enabled);
-  VLOG(2) << format_connection_log("readDisable: enabled={} disable={}", *this, read_enabled, disable);
+  VLOG(2) << format_connection_log("readDisable: enabled={} disable={}", *this, read_enabled,
+                                   disable);
 
   // When we disable reads, we still allow for early close notifications (the equivalent of
   // EPOLLRDHUP for an epoll backend). For backends that support it, this allows us to apply

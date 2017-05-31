@@ -274,7 +274,8 @@ void ConnectionImpl::shutdownNotice() {
 }
 
 int ConnectionImpl::onFrameReceived(const nghttp2_frame* frame) {
-  VLOG(2) << format_connection_log("recv frame type={}", connection_, static_cast<uint64_t>(frame->hd.type));
+  VLOG(2) << format_connection_log("recv frame type={}", connection_,
+                                   static_cast<uint64_t>(frame->hd.type));
 
   // Only raise GOAWAY once, since we don't currently expose stream information. Shutdown
   // notifications are the same as a normal GOAWAY.
@@ -387,7 +388,8 @@ int ConnectionImpl::onFrameSend(const nghttp2_frame* frame) {
   // data from our peer. Sometimes it raises the invalid frame callback, and sometimes it does not.
   // In all cases however it will attempt to send a GOAWAY frame with an error status. If we see
   // an outgoing frame of this type, we will return an error code so that we can abort execution.
-  VLOG(2) << format_connection_log("sent frame type={}", connection_, static_cast<uint64_t>(frame->hd.type));
+  VLOG(2) << format_connection_log("sent frame type={}", connection_,
+                                   static_cast<uint64_t>(frame->hd.type));
   switch (frame->hd.type) {
   case NGHTTP2_GOAWAY: {
     if (frame->goaway.error_code != NGHTTP2_NO_ERROR) {
@@ -397,7 +399,8 @@ int ConnectionImpl::onFrameSend(const nghttp2_frame* frame) {
   }
 
   case NGHTTP2_RST_STREAM: {
-    VLOG(1) << format_connection_log("sent reset code={}", connection_, frame->rst_stream.error_code);
+    VLOG(1) << format_connection_log("sent reset code={}", connection_,
+                                     frame->rst_stream.error_code);
     stats_.tx_reset_.inc();
     break;
   }

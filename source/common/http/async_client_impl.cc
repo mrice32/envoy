@@ -83,8 +83,8 @@ void AsyncStreamImpl::encodeHeaders(HeaderMapPtr&& headers, bool end_stream) {
 }
 
 void AsyncStreamImpl::encodeData(Buffer::Instance& data, bool end_stream) {
-  VLOG(2) << fmt::format("async http request response data (length={} end_stream={})", data.length(),
-            end_stream);
+  VLOG(2) << fmt::format("async http request response data (length={} end_stream={})",
+                         data.length(), end_stream);
   stream_callbacks_.onData(data, end_stream);
   closeRemote(end_stream);
 }

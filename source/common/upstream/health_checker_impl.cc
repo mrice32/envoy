@@ -291,14 +291,14 @@ void HttpHealthCheckerImpl::HttpActiveHealthCheckSession::onResetStream(Http::St
   }
 
   VLOG(1) << format_connection_log("connection/stream error health_flags={}", *client_,
-                 HostUtility::healthFlagsToString(*host_));
+                                   HostUtility::healthFlagsToString(*host_));
   handleFailure(true);
 }
 
 bool HttpHealthCheckerImpl::HttpActiveHealthCheckSession::isHealthCheckSucceeded() {
   uint64_t response_code = Http::Utility::getResponseStatus(*response_headers_);
   VLOG(1) << format_connection_log("hc response={} health_flags={}", *client_, response_code,
-                 HostUtility::healthFlagsToString(*host_));
+                                   HostUtility::healthFlagsToString(*host_));
 
   if (response_code != enumToInt(Http::Code::OK)) {
     return false;
@@ -337,7 +337,7 @@ void HttpHealthCheckerImpl::HttpActiveHealthCheckSession::onResponseComplete() {
 
 void HttpHealthCheckerImpl::HttpActiveHealthCheckSession::onTimeout() {
   VLOG(1) << format_connection_log("connection/stream timeout health_flags={}", *client_,
-                 HostUtility::healthFlagsToString(*host_));
+                                   HostUtility::healthFlagsToString(*host_));
 
   // If there is an active request it will get reset, so make sure we ignore the reset.
   expect_reset_ = true;

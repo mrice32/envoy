@@ -65,7 +65,7 @@ void CodecClient::onEvent(uint32_t events) {
   if ((events & Network::ConnectionEvent::RemoteClose) ||
       (events & Network::ConnectionEvent::LocalClose)) {
     VLOG(1) << format_connection_log("disconnect. resetting {} pending requests", *connection_,
-                   active_requests_.size());
+                                     active_requests_.size());
     while (!active_requests_.empty()) {
       // Fake resetting all active streams so that reset() callbacks get invoked.
       active_requests_.front()->encoder_->getStream().resetStream(

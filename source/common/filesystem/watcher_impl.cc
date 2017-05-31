@@ -44,7 +44,8 @@ void WatcherImpl::addWatch(const std::string& path, uint32_t events, OnChangedCb
         fmt::format("unable to add filesystem watch for file {}: {}", path, strerror(errno)));
   }
 
-  VLOG(1) << fmt::format("added watch for directory: '{}' file: '{}' fd: {}", directory, file, watch_fd);
+  VLOG(1) << fmt::format("added watch for directory: '{}' file: '{}' fd: {}", directory, file,
+                         watch_fd);
   callback_map_[watch_fd].watches_.push_back({file, events, callback});
 }
 
@@ -66,7 +67,8 @@ void WatcherImpl::onInotifyEvent() {
         file.assign(file_event->name);
       }
 
-      VLOG(1) << fmt::format("notification: fd: {} mask: {:x} file: {}", file_event->wd, file_event->mask, file);
+      VLOG(1) << fmt::format("notification: fd: {} mask: {:x} file: {}", file_event->wd,
+                             file_event->mask, file);
 
       uint32_t events = 0;
       if (file_event->mask & IN_MOVED_TO) {

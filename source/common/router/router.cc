@@ -149,7 +149,8 @@ Http::FilterHeadersStatus Filter::decodeHeaders(Http::HeaderMap& headers, bool e
   route_ = callbacks_->route();
   if (!route_) {
     config_.stats_.no_route_.inc();
-    VLOG(1) << format_stream_log("no cluster match for URL '{}'", *callbacks_, headers.Path()->value().c_str());
+    VLOG(1) << format_stream_log("no cluster match for URL '{}'", *callbacks_,
+                                 headers.Path()->value().c_str());
 
     callbacks_->requestInfo().setResponseFlag(Http::AccessLog::ResponseFlag::NoRouteFound);
     Http::HeaderMapPtr response_headers{new Http::HeaderMapImpl{
@@ -182,8 +183,8 @@ Http::FilterHeadersStatus Filter::decodeHeaders(Http::HeaderMap& headers, bool e
 
   // Set up stat prefixes, etc.
   request_vcluster_ = route_entry_->virtualCluster(headers);
-  VLOG(1) << format_stream_log("cluster '{}' match for URL '{}'", *callbacks_, route_entry_->clusterName(),
-                   headers.Path()->value().c_str());
+  VLOG(1) << format_stream_log("cluster '{}' match for URL '{}'", *callbacks_,
+                               route_entry_->clusterName(), headers.Path()->value().c_str());
 
   const Http::HeaderEntry* request_alt_name = headers.EnvoyUpstreamAltStatName();
   if (request_alt_name) {
@@ -232,8 +233,9 @@ Http::FilterHeadersStatus Filter::decodeHeaders(Http::HeaderMap& headers, bool e
 
 #ifndef NDEBUG
   headers.iterate([](const Http::HeaderEntry& header, void* context) -> void {
-    VLOG(1) << format_stream_log("  '{}':'{}'", *static_cast<Http::StreamDecoderFilterCallbacks*>(context),
-                     header.key().c_str(), header.value().c_str());
+    VLOG(1) << format_stream_log("  '{}':'{}'",
+                                 *static_cast<Http::StreamDecoderFilterCallbacks*>(context),
+                                 header.key().c_str(), header.value().c_str());
   }, callbacks_);
 #endif
 

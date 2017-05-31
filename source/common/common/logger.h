@@ -196,16 +196,15 @@ protected:
 } // Logger
 
 // Function for formatting the connection log
-template<typename T, typename... Args>
-std::string format_connection_log(const std::string &format, T &connection, Args&&... args)
-{
+template <typename T, typename... Args>
+std::string format_connection_log(const std::string& format, T& connection, Args&&... args) {
   return fmt::format("[C{}] " + format, connection.id(), std::forward<Args>(args)...);
 }
 
 // Function for formatting the stream log
-template<typename T, typename... Args>
-std::string format_stream_log(const std::string &format, T &stream, Args&&... args)
-{
-  return fmt::format("[C{}][S{}] " + format, stream.connectionId(), stream.streamId(), std::forward<Args>(args)...);
+template <typename T, typename... Args>
+std::string format_stream_log(const std::string& format, T& stream, Args&&... args) {
+  return fmt::format("[C{}][S{}] " + format, stream.connectionId(), stream.streamId(),
+                     std::forward<Args>(args)...);
 }
 } // Envoy

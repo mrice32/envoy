@@ -108,7 +108,8 @@ TimerPtr DispatcherImpl::createTimer(TimerCb cb) { return TimerPtr{new TimerImpl
 
 void DispatcherImpl::deferredDelete(DeferredDeletablePtr&& to_delete) {
   current_to_delete_->emplace_back(std::move(to_delete));
-  VLOG(2) << fmt::format("item added to deferred deletion list (size={})", current_to_delete_->size());
+  VLOG(2) << fmt::format("item added to deferred deletion list (size={})",
+                         current_to_delete_->size());
   if (1 == current_to_delete_->size()) {
     deferred_delete_timer_->enableTimer(std::chrono::milliseconds(0));
   }

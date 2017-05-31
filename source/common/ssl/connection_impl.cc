@@ -131,8 +131,9 @@ void ConnectionImpl::drainErrorQueue() {
       saw_error = true;
     }
 
-    VLOG(1) << format_connection_log("SSL error: {}:{}:{}:{}", *this, err, ERR_lib_error_string(err),
-                   ERR_func_error_string(err), ERR_reason_error_string(err));
+    VLOG(1) << format_connection_log("SSL error: {}:{}:{}:{}", *this, err,
+                                     ERR_lib_error_string(err), ERR_func_error_string(err),
+                                     ERR_reason_error_string(err));
     UNREFERENCED_PARAMETER(err);
   }
 }

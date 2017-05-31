@@ -361,7 +361,8 @@ void DocumentImpl::fromBuffer(Buffer::Instance& data) {
     throw EnvoyException("invalid BSON message length");
   }
 
-  VLOG(2) << fmt::format("BSON document length: {} data length: {}", message_length, original_buffer_length);
+  VLOG(2) << fmt::format("BSON document length: {} data length: {}", message_length,
+                         original_buffer_length);
 
   while (true) {
     uint64_t document_bytes_remaining = data.length() - (original_buffer_length - message_length);
