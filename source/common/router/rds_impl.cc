@@ -76,7 +76,7 @@ Router::ConfigConstSharedPtr RdsRouteConfigProviderImpl::config() {
 }
 
 void RdsRouteConfigProviderImpl::createRequest(Http::Message& request) {
-  VLOG(1) << fmt::format("rds: starting request");
+  DVLOG(1) << "rds: starting request";
   stats_.update_attempt_.inc();
   request.headers().insertMethod().value(Http::Headers::get().MethodValues.Get);
   request.headers().insertPath().value(fmt::format("/v1/routes/{}/{}/{}", route_config_name_,
@@ -85,7 +85,7 @@ void RdsRouteConfigProviderImpl::createRequest(Http::Message& request) {
 }
 
 void RdsRouteConfigProviderImpl::parseResponse(const Http::Message& response) {
-  VLOG(1) << fmt::format("rds: parsing response");
+  DVLOG(1) << "rds: parsing response";
   Json::ObjectSharedPtr response_json = Json::Factory::loadFromString(response.bodyAsString());
   uint64_t new_hash = response_json->hash();
   if (new_hash != last_config_hash_ || !initialized_) {
@@ -94,7 +94,7 @@ void RdsRouteConfigProviderImpl::parseResponse(const Http::Message& response) {
     initialized_ = true;
     last_config_hash_ = new_hash;
     stats_.config_reload_.inc();
-    VLOG(1) << fmt::format("rds: loading new configuration: config_name={} hash={}",
+    DVLOG(1) << fmt::format("rds: loading new configuration: config_name={} hash={}",
                            route_config_name_, new_hash);
     tls_.runOnAllThreads([this, new_config]() -> void {
       tls_.getTyped<ThreadLocalConfig>(tls_slot_).config_ = new_config;
@@ -116,7 +116,7 @@ void RdsRouteConfigProviderImpl::onFetchFailure(EnvoyException* e) {
   if (e) {
     LOG(WARNING) << fmt::format("rds: fetch failure: {}", e->what());
   } else {
-    LOG(INFO) << fmt::format("rds: fetch failure: network error");
+    LOG(INFO) << "rds: fetch failure: network error";
   }
 }
 

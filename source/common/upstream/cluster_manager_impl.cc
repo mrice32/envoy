@@ -96,7 +96,7 @@ void ClusterManagerInitHelper::maybeFinishInitialize() {
   // initialize on them. This is only done once.
   if (!secondary_init_clusters_.empty()) {
     if (!started_secondary_initialize_) {
-      LOG(INFO) << fmt::format("cm init: initializing secondary clusters");
+      LOG(INFO) << "cm init: initializing secondary clusters";
       started_secondary_initialize_ = true;
       // Cluster::initialize() method can modify the list of secondary_init_clusters_ to remove
       // the item currently being initialized, so we eschew range-based-for and do this complicated
@@ -115,7 +115,7 @@ void ClusterManagerInitHelper::maybeFinishInitialize() {
   // directly to initialized.
   started_secondary_initialize_ = false;
   if (state_ == State::WaitingForStaticInitialize && cds_) {
-    LOG(INFO) << fmt::format("cm init: initializing cds");
+    LOG(INFO) << "cm init: initializing cds";
     state_ = State::WaitingForCdsInitialize;
     cds_->initialize();
   } else {

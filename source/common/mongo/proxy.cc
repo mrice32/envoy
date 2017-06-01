@@ -52,25 +52,25 @@ ProxyFilter::~ProxyFilter() {}
 void ProxyFilter::decodeGetMore(GetMoreMessagePtr&& message) {
   stats_.op_get_more_.inc();
   logMessage(*message, true);
-  VLOG(1) << fmt::format("decoded GET_MORE: {}", message->toString(true));
+  DVLOG(1) << fmt::format("decoded GET_MORE: {}", message->toString(true));
 }
 
 void ProxyFilter::decodeInsert(InsertMessagePtr&& message) {
   stats_.op_insert_.inc();
   logMessage(*message, true);
-  VLOG(1) << fmt::format("decoded INSERT: {}", message->toString(true));
+  DVLOG(1) << fmt::format("decoded INSERT: {}", message->toString(true));
 }
 
 void ProxyFilter::decodeKillCursors(KillCursorsMessagePtr&& message) {
   stats_.op_kill_cursors_.inc();
   logMessage(*message, true);
-  VLOG(1) << fmt::format("decoded KILL_CURSORS: {}", message->toString(true));
+  DVLOG(1) << fmt::format("decoded KILL_CURSORS: {}", message->toString(true));
 }
 
 void ProxyFilter::decodeQuery(QueryMessagePtr&& message) {
   stats_.op_query_.inc();
   logMessage(*message, true);
-  VLOG(1) << fmt::format("decoded QUERY: {}", message->toString(true));
+  DVLOG(1) << fmt::format("decoded QUERY: {}", message->toString(true));
 
   if (message->flags() & QueryMessage::Flags::TailableCursor) {
     stats_.op_query_tailable_cursor_.inc();
@@ -132,7 +132,7 @@ void ProxyFilter::chargeQueryStats(const std::string& prefix,
 void ProxyFilter::decodeReply(ReplyMessagePtr&& message) {
   stats_.op_reply_.inc();
   logMessage(*message, false);
-  VLOG(1) << fmt::format("decoded REPLY: {}", message->toString(true));
+  DVLOG(1) << fmt::format("decoded REPLY: {}", message->toString(true));
 
   if (message->cursorId() != 0) {
     stats_.op_reply_valid_cursor_.inc();

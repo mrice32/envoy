@@ -98,7 +98,7 @@ void MainImpl::initialize(const Json::Object& json) {
 }
 
 void MainImpl::initializeTracers(const Json::Object& configuration) {
-  LOG(INFO) << fmt::format("loading tracing configuration");
+  LOG(INFO) << "loading tracing configuration";
 
   if (!configuration.hasObject("tracing")) {
     http_tracer_.reset(new Tracing::HttpNullTracer());
@@ -121,7 +121,7 @@ void MainImpl::initializeTracers(const Json::Object& configuration) {
   Json::ObjectSharedPtr driver = http_tracer_config->getObject("driver");
 
   std::string type = driver->getString("type");
-  LOG(INFO) << fmt::format(fmt::format("  loading tracing driver: {}", type));
+  LOG(INFO) << fmt::format("  loading tracing driver: {}", type);
 
   Json::ObjectSharedPtr driver_config = driver->getObject("config");
 

@@ -379,7 +379,7 @@ void HotRestartImpl::onSocketEvent() {
     }
 
     case RpcMessageType::TerminateRequest: {
-      LOG(WARNING) << fmt::format("shutting down due to child request");
+      LOG(WARNING) << "shutting down due to child request";
       kill(getpid(), SIGTERM);
       break;
     }

@@ -129,7 +129,7 @@ Network::FilterStatus TcpProxy::initializeUpstreamConnection() {
   Upstream::ThreadLocalCluster* thread_local_cluster = cluster_manager_.get(cluster_name);
 
   if (thread_local_cluster) {
-    VLOG(1) << format_connection_log("Creating connection to cluster {}",
+    DVLOG(1) << format_connection_log("Creating connection to cluster {}",
                                      read_callbacks_->connection(), cluster_name);
   } else {
     config_->stats().downstream_cx_no_route_.inc();
@@ -180,7 +180,7 @@ Network::FilterStatus TcpProxy::initializeUpstreamConnection() {
 }
 
 void TcpProxy::onConnectTimeout() {
-  VLOG(1) << format_connection_log("connect timeout", read_callbacks_->connection());
+  DVLOG(1) << format_connection_log("connect timeout", read_callbacks_->connection());
   read_callbacks_->upstreamHost()->cluster().stats().upstream_cx_connect_timeout_.inc();
 
   // This will close the upstream connection as well.
@@ -188,7 +188,7 @@ void TcpProxy::onConnectTimeout() {
 }
 
 Network::FilterStatus TcpProxy::onData(Buffer::Instance& data) {
-  VLOG(2) << format_connection_log("received {} bytes", read_callbacks_->connection(),
+  DVLOG(2) << format_connection_log("received {} bytes", read_callbacks_->connection(),
                                    data.length());
   upstream_connection_->write(data);
   ASSERT(0 == data.length());

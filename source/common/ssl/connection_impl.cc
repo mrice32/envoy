@@ -59,7 +59,7 @@ Network::ConnectionImpl::IoResult ConnectionImpl::doReadFromSocket() {
     uint64_t num_slices = read_buffer_.reserve(16384, slices, 2);
     for (uint64_t i = 0; i < num_slices; i++) {
       int rc = SSL_read(ssl_.get(), slices[i].mem_, slices[i].len_);
-      VLOG(2) << format_connection_log("ssl read returns: {}", *this, rc);
+      DVLOG(2) << format_connection_log("ssl read returns: {}", *this, rc);
       if (rc > 0) {
         slices[i].len_ = rc;
         slices_to_commit++;
@@ -98,9 +98,9 @@ Network::ConnectionImpl::PostIoAction ConnectionImpl::doHandshake() {
   ASSERT(!handshake_complete_);
   int rc = SSL_do_handshake(ssl_.get());
   if (rc == 1) {
-    VLOG(1) << format_connection_log("handshake complete", *this);
+    DVLOG(1) << format_connection_log("handshake complete", *this);
     if (!ctx_.verifyPeer(ssl_.get())) {
-      VLOG(1) << format_connection_log("SSL peer verification failed", *this);
+      DVLOG(1) << format_connection_log("SSL peer verification failed", *this);
       return PostIoAction::Close;
     }
 
@@ -111,7 +111,7 @@ Network::ConnectionImpl::PostIoAction ConnectionImpl::doHandshake() {
     return state() == State::Open ? PostIoAction::KeepOpen : PostIoAction::Close;
   } else {
     int err = SSL_get_error(ssl_.get(), rc);
-    VLOG(1) << format_connection_log("handshake error: {}", *this, err);
+    DVLOG(1) << format_connection_log("handshake error: {}", *this, err);
     switch (err) {
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
@@ -131,7 +131,7 @@ void ConnectionImpl::drainErrorQueue() {
       saw_error = true;
     }
 
-    VLOG(1) << format_connection_log("SSL error: {}:{}:{}:{}", *this, err,
+    DVLOG(1) << format_connection_log("SSL error: {}:{}:{}:{}", *this, err,
                                      ERR_lib_error_string(err), ERR_func_error_string(err),
                                      ERR_reason_error_string(err));
     UNREFERENCED_PARAMETER(err);
@@ -168,7 +168,7 @@ Network::ConnectionImpl::IoResult ConnectionImpl::doWriteToSocket() {
       // particular chain to increase in size. So as long as we start writing where we left off we
       // are guaranteed to call SSL_write() with the same parameters.
       int rc = SSL_write(ssl_.get(), slices[i].mem_, slices[i].len_);
-      VLOG(2) << format_connection_log("ssl write returns: {}", *this, rc);
+      DVLOG(2) << format_connection_log("ssl write returns: {}", *this, rc);
       if (rc > 0) {
         inner_bytes_written += rc;
         total_bytes_written += rc;
@@ -260,7 +260,7 @@ void ConnectionImpl::closeSocket(uint32_t close_type) {
     // there is no room on the socket. We can extend the state machine to handle this at some point
     // if needed.
     int rc = SSL_shutdown(ssl_.get());
-    VLOG(1) << format_connection_log("SSL shutdown: rc={}", *this, rc);
+    DVLOG(1) << format_connection_log("SSL shutdown: rc={}", *this, rc);
     UNREFERENCED_PARAMETER(rc);
     drainErrorQueue();
   }

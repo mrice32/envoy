@@ -47,7 +47,7 @@ StreamEncoder& CodecClient::newStream(StreamDecoder& response_decoder) {
 
 void CodecClient::onEvent(uint32_t events) {
   if (events & Network::ConnectionEvent::Connected) {
-    VLOG(1) << format_connection_log("connected", *connection_);
+    DVLOG(1) << format_connection_log("connected", *connection_);
     connected_ = true;
   }
 
@@ -64,7 +64,7 @@ void CodecClient::onEvent(uint32_t events) {
 
   if ((events & Network::ConnectionEvent::RemoteClose) ||
       (events & Network::ConnectionEvent::LocalClose)) {
-    VLOG(1) << format_connection_log("disconnect. resetting {} pending requests", *connection_,
+    DVLOG(1) << format_connection_log("disconnect. resetting {} pending requests", *connection_,
                                      active_requests_.size());
     while (!active_requests_.empty()) {
       // Fake resetting all active streams so that reset() callbacks get invoked.
@@ -76,7 +76,7 @@ void CodecClient::onEvent(uint32_t events) {
 }
 
 void CodecClient::responseDecodeComplete(ActiveRequest& request) {
-  VLOG(1) << format_connection_log("response complete", *connection_);
+  DVLOG(1) << format_connection_log("response complete", *connection_);
   deleteRequest(request);
 
   // HTTP/2 can send us a reset after a complete response if the request was not complete. Users
@@ -86,7 +86,7 @@ void CodecClient::responseDecodeComplete(ActiveRequest& request) {
 }
 
 void CodecClient::onReset(ActiveRequest& request, StreamResetReason reason) {
-  VLOG(1) << format_connection_log("request reset", *connection_);
+  DVLOG(1) << format_connection_log("request reset", *connection_);
   if (codec_client_callbacks_) {
     codec_client_callbacks_->onStreamReset(reason);
   }

@@ -72,9 +72,9 @@ AsyncStreamImpl::AsyncStreamImpl(AsyncClientImpl& parent, AsyncClient::StreamCal
 
 void AsyncStreamImpl::encodeHeaders(HeaderMapPtr&& headers, bool end_stream) {
 #ifndef NDEBUG
-  VLOG(1) << fmt::format("async http request response headers (end_stream={}):", end_stream);
+  DVLOG(1) << fmt::format("async http request response headers (end_stream={}):", end_stream);
   headers->iterate([](const HeaderEntry& header, void*) -> void {
-    VLOG(1) << fmt::format("  '{}':'{}'", header.key().c_str(), header.value().c_str());
+    DVLOG(1) << fmt::format("  '{}':'{}'", header.key().c_str(), header.value().c_str());
   }, nullptr);
 #endif
 
@@ -83,7 +83,7 @@ void AsyncStreamImpl::encodeHeaders(HeaderMapPtr&& headers, bool end_stream) {
 }
 
 void AsyncStreamImpl::encodeData(Buffer::Instance& data, bool end_stream) {
-  VLOG(2) << fmt::format("async http request response data (length={} end_stream={})",
+  DVLOG(2) << fmt::format("async http request response data (length={} end_stream={})",
                          data.length(), end_stream);
   stream_callbacks_.onData(data, end_stream);
   closeRemote(end_stream);
@@ -91,9 +91,9 @@ void AsyncStreamImpl::encodeData(Buffer::Instance& data, bool end_stream) {
 
 void AsyncStreamImpl::encodeTrailers(HeaderMapPtr&& trailers) {
 #ifndef NDEBUG
-  VLOG(1) << fmt::format("async http request response trailers:");
+  DVLOG(1) << "async http request response trailers:";
   trailers->iterate([](const HeaderEntry& header, void*) -> void {
-    VLOG(1) << fmt::format("  '{}':'{}'", header.key().c_str(), header.value().c_str());
+    DVLOG(1) << fmt::format("  '{}':'{}'", header.key().c_str(), header.value().c_str());
   }, nullptr);
 #endif
 

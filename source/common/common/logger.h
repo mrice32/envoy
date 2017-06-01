@@ -102,14 +102,37 @@ private:
   const int log_severity_;
 };
 
+class NullStream {
+public:
+  template <typename T> NullStream& operator<<(T&& t) {
+    return *this;
+  }
+};
+
 #define LOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::SpdLogStream(LOG_OBJECT, LEVEL)
 
 #define VLOG_TO_OBJECT(LOG_OBJECT, LEVEL)                                                          \
   Logger::SpdLogStream(LOG_OBJECT, (LEVEL == 1) ? SPD_ONLY_DEBUG : SPD_ONLY_TRACE)
 
 #define LOG(LEVEL) LOG_TO_OBJECT(log(), LEVEL)
-
 #define VLOG(LEVEL) VLOG_TO_OBJECT(log(), LEVEL)
+
+#ifdef NDEBUG
+
+// Send debug LOG calls to the NullStream when not compiled in debug mode.
+#define DLOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::NullStream()
+#define DVLOG_TO_OBJECT(LOG_OBJECT, LEVEL) Logger::NullStream()
+
+#else
+
+// Send debug LOG calls to the non-debug LOG calls when compiled in debug mode.
+#define DLOG_TO_OBJECT(LOG_OBJECT, LEVEL) LOG_TO_OBJECT(LOG_OBJECT, LEVEL)
+#define DVLOG_TO_OBJECT(LOG_OBJECT, LEVEL) VLOG_TO_OBJECT(LOG_OBJECT, LEVEL)
+
+#endif
+
+#define DLOG(LEVEL) DLOG_TO_OBJECT(log(), LEVEL)
+#define DVLOG(LEVEL) DVLOG_TO_OBJECT(log(), LEVEL)
 
 #endif
 
@@ -195,13 +218,13 @@ protected:
 
 } // Logger
 
-// Function for formatting the connection log
+// Function for formatting a connection log.
 template <typename T, typename... Args>
 std::string format_connection_log(const std::string& format, T& connection, Args&&... args) {
   return fmt::format("[C{}] " + format, connection.id(), std::forward<Args>(args)...);
 }
 
-// Function for formatting the stream log
+// Function for formatting a stream log.
 template <typename T, typename... Args>
 std::string format_stream_log(const std::string& format, T& stream, Args&&... args) {
   return fmt::format("[C{}][S{}] " + format, stream.connectionId(), stream.streamId(),

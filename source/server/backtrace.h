@@ -73,7 +73,7 @@ public:
     // The size must be at least two for useful info - there is a sentinel frame
     // at the end that we ignore.
     if (stack_trace_.size() < 2) {
-      LOG(ERROR) << fmt::format("Back trace attempt failed");
+      LOG(ERROR) << "Back trace attempt failed";
       return;
     }
 

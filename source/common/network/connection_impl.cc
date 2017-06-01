@@ -92,7 +92,7 @@ void ConnectionImpl::close(ConnectionCloseType type) {
   }
 
   uint64_t data_to_write = write_buffer_.length();
-  VLOG(1) << format_connection_log("closing data_to_write={} type={}", *this, data_to_write,
+  DVLOG(1) << format_connection_log("closing data_to_write={} type={}", *this, data_to_write,
                                    enumToInt(type));
   if (data_to_write == 0 || type == ConnectionCloseType::NoFlush) {
     if (data_to_write > 0) {
@@ -126,7 +126,7 @@ void ConnectionImpl::closeSocket(uint32_t close_type) {
     return;
   }
 
-  VLOG(1) << format_connection_log("closing socket: {}", *this, close_type);
+  DVLOG(1) << format_connection_log("closing socket: {}", *this, close_type);
 
   // Drain input and output buffers.
   updateReadBufferStats(0, 0);
@@ -188,7 +188,7 @@ void ConnectionImpl::onRead(uint64_t read_buffer_size) {
 void ConnectionImpl::readDisable(bool disable) {
   bool read_enabled = readEnabled();
   UNREFERENCED_PARAMETER(read_enabled);
-  VLOG(2) << format_connection_log("readDisable: enabled={} disable={}", *this, read_enabled,
+  DVLOG(2) << format_connection_log("readDisable: enabled={} disable={}", *this, read_enabled,
                                    disable);
 
   // When we disable reads, we still allow for early close notifications (the equivalent of
@@ -242,7 +242,7 @@ void ConnectionImpl::write(Buffer::Instance& data) {
   }
 
   if (data.length() > 0) {
-    VLOG(2) << format_connection_log("writing {} bytes", *this, data.length());
+    DVLOG(2) << format_connection_log("writing {} bytes", *this, data.length());
     // TODO(mattklein123): All data currently gets moved from the source buffer to the write buffer.
     // This can lead to inefficient behavior if writing a bunch of small chunks. In this case, it
     // would likely be more efficient to copy data below a certain size. VERY IMPORTANT: If this is
@@ -257,10 +257,10 @@ void ConnectionImpl::write(Buffer::Instance& data) {
 }
 
 void ConnectionImpl::onFileEvent(uint32_t events) {
-  VLOG(2) << format_connection_log("socket event: {}", *this, events);
+  DVLOG(2) << format_connection_log("socket event: {}", *this, events);
 
   if (state_ & InternalState::ImmediateConnectionError) {
-    VLOG(1) << format_connection_log("raising immediate connect error", *this);
+    DVLOG(1) << format_connection_log("raising immediate connect error", *this);
     closeSocket(ConnectionEvent::RemoteClose);
     return;
   }
@@ -269,7 +269,7 @@ void ConnectionImpl::onFileEvent(uint32_t events) {
     // We never ask for both early close and read at the same time. If we are reading, we want to
     // consume all available data.
     ASSERT(!(events & Event::FileReadyType::Read));
-    VLOG(1) << format_connection_log("remote early close", *this);
+    DVLOG(1) << format_connection_log("remote early close", *this);
     closeSocket(ConnectionEvent::RemoteClose);
     return;
   }
@@ -297,7 +297,7 @@ ConnectionImpl::IoResult ConnectionImpl::doReadFromSocket() {
     // TODO(mattklein123) PERF: Tune the read size and figure out a way of getting rid of the
     // ioctl(). The extra syscall is not worth it.
     int rc = read_buffer_.read(fd_, 16384);
-    VLOG(2) << format_connection_log("read returns: {}", *this, rc);
+    DVLOG(2) << format_connection_log("read returns: {}", *this, rc);
 
     // Remote close. Might need to raise data before raising close.
     if (rc == 0) {
@@ -305,7 +305,7 @@ ConnectionImpl::IoResult ConnectionImpl::doReadFromSocket() {
       break;
     } else if (rc == -1) {
       // Remote error (might be no data).
-      VLOG(2) << format_connection_log("read error: {}", *this, errno);
+      DVLOG(2) << format_connection_log("read error: {}", *this, errno);
       if (errno != EAGAIN) {
         action = PostIoAction::Close;
       }
@@ -333,7 +333,7 @@ void ConnectionImpl::onReadReady() {
 
   // The read callback may have already closed the connection.
   if (result.action_ == PostIoAction::Close) {
-    VLOG(1) << format_connection_log("remote close", *this);
+    DVLOG(1) << format_connection_log("remote close", *this);
     closeSocket(ConnectionEvent::RemoteClose);
   }
 }
@@ -348,9 +348,9 @@ ConnectionImpl::IoResult ConnectionImpl::doWriteToSocket() {
     }
 
     int rc = write_buffer_.write(fd_);
-    VLOG(2) << format_connection_log("write returns: {}", *this, rc);
+    DVLOG(2) << format_connection_log("write returns: {}", *this, rc);
     if (rc == -1) {
-      VLOG(2) << format_connection_log("write error: {}", *this, errno);
+      DVLOG(2) << format_connection_log("write error: {}", *this, errno);
       if (errno == EAGAIN) {
         action = PostIoAction::KeepOpen;
       } else {
@@ -369,7 +369,7 @@ ConnectionImpl::IoResult ConnectionImpl::doWriteToSocket() {
 void ConnectionImpl::onConnected() { raiseEvents(ConnectionEvent::Connected); }
 
 void ConnectionImpl::onWriteReady() {
-  VLOG(2) << format_connection_log("write ready", *this);
+  DVLOG(2) << format_connection_log("write ready", *this);
 
   if (state_ & InternalState::Connecting) {
     int error;
@@ -379,16 +379,16 @@ void ConnectionImpl::onWriteReady() {
     UNREFERENCED_PARAMETER(rc);
 
     if (error == 0) {
-      VLOG(1) << format_connection_log("connected", *this);
+      DVLOG(1) << format_connection_log("connected", *this);
       state_ &= ~InternalState::Connecting;
       onConnected();
       // It's possible that we closed during the connect callback.
       if (state() != State::Open) {
-        VLOG(1) << format_connection_log("close during connected callback", *this);
+        DVLOG(1) << format_connection_log("close during connected callback", *this);
         return;
       }
     } else {
-      VLOG(1) << format_connection_log("delayed connection error: {}", *this, error);
+      DVLOG(1) << format_connection_log("delayed connection error: {}", *this, error);
       closeSocket(ConnectionEvent::RemoteClose);
       return;
     }
@@ -404,13 +404,13 @@ void ConnectionImpl::onWriteReady() {
     // callback, raise a connected event, and close the connection.
     closeSocket(ConnectionEvent::RemoteClose);
   } else if ((state_ & InternalState::CloseWithFlush) && new_buffer_size == 0) {
-    VLOG(1) << format_connection_log("write flush complete", *this);
+    DVLOG(1) << format_connection_log("write flush complete", *this);
     closeSocket(ConnectionEvent::LocalClose);
   }
 }
 
 void ConnectionImpl::doConnect() {
-  VLOG(1) << format_connection_log("connecting to {}", *this, remote_address_->asString());
+  DVLOG(1) << format_connection_log("connecting to {}", *this, remote_address_->asString());
   int rc = remote_address_->connect(fd_);
   if (rc == 0) {
     // write will become ready.
@@ -419,11 +419,11 @@ void ConnectionImpl::doConnect() {
     ASSERT(rc == -1);
     if (errno == EINPROGRESS) {
       state_ |= InternalState::Connecting;
-      VLOG(1) << format_connection_log("connection in progress", *this);
+      DVLOG(1) << format_connection_log("connection in progress", *this);
     } else {
       // read/write will become ready.
       state_ |= InternalState::ImmediateConnectionError;
-      VLOG(1) << format_connection_log("immediate connection error: {}", *this, errno);
+      DVLOG(1) << format_connection_log("immediate connection error: {}", *this, errno);
     }
   }
 }

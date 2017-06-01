@@ -128,10 +128,10 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
   uint64_t remaining = slice.len_;
 
   while (remaining || state_ == State::ValueComplete) {
-    VLOG(2) << fmt::format("parse slice: {} remaining", remaining);
+    DVLOG(2) << fmt::format("parse slice: {} remaining", remaining);
     switch (state_) {
     case State::ValueRootStart: {
-      VLOG(2) << fmt::format("parse slice: ValueRootStart");
+      DVLOG(2) << "parse slice: ValueRootStart";
       pending_value_root_.reset(new RespValue());
       pending_value_stack_.push_front({pending_value_root_.get(), 0});
       state_ = State::ValueStart;
@@ -139,7 +139,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
     }
 
     case State::ValueStart: {
-      VLOG(2) << fmt::format("parse slice: ValueStart: {}", buffer[0]);
+      DVLOG(2) << fmt::format("parse slice: ValueStart: {}", buffer[0]);
       pending_integer_.reset();
       switch (buffer[0]) {
       case '*': {
@@ -176,7 +176,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
     }
 
     case State::IntegerStart: {
-      VLOG(2) << fmt::format("parse slice: IntegerStart: {}", buffer[0]);
+      DVLOG(2) << fmt::format("parse slice: IntegerStart: {}", buffer[0]);
       if (buffer[0] == '-') {
         pending_integer_.negative_ = true;
         remaining--;
@@ -188,7 +188,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
     }
 
     case State::Integer: {
-      VLOG(2) << fmt::format("parse slice: Integer: {}", buffer[0]);
+      DVLOG(2) << fmt::format("parse slice: Integer: {}", buffer[0]);
       char c = buffer[0];
       if (buffer[0] == '\r') {
         state_ = State::IntegerLF;
@@ -210,7 +210,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
         throw ProtocolError("expected new line");
       }
 
-      VLOG(2) << fmt::format("parse slice: IntegerLF: {}", pending_integer_.integer_);
+      DVLOG(2) << fmt::format("parse slice: IntegerLF: {}", pending_integer_.integer_);
       remaining--;
       buffer++;
 
@@ -264,7 +264,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
       buffer += length_to_copy;
 
       if (pending_integer_.integer_ == 0) {
-        VLOG(2) << fmt::format("parse slice: BulkStringBody complete: {}",
+        DVLOG(2) << fmt::format("parse slice: BulkStringBody complete: {}",
                                pending_value_stack_.front().value_->asString());
         state_ = State::CR;
       }
@@ -273,7 +273,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
     }
 
     case State::CR: {
-      VLOG(2) << fmt::format("parse slice: CR");
+      DVLOG(2) << "parse slice: CR";
       if (buffer[0] != '\r') {
         throw ProtocolError("expected carriage return");
       }
@@ -285,7 +285,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
     }
 
     case State::LF: {
-      VLOG(2) << fmt::format("parse slice: LF");
+      DVLOG(2) << "parse slice: LF";
       if (buffer[0] != '\n') {
         throw ProtocolError("expected new line");
       }
@@ -297,7 +297,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
     }
 
     case State::SimpleString: {
-      VLOG(2) << fmt::format("parse slice: SimpleString: {}", buffer[0]);
+      DVLOG(2) << fmt::format("parse slice: SimpleString: {}", buffer[0]);
       if (buffer[0] == '\r') {
         state_ = State::LF;
       } else {
@@ -310,7 +310,7 @@ void DecoderImpl::parseSlice(const Buffer::RawSlice& slice) {
     }
 
     case State::ValueComplete: {
-      VLOG(2) << fmt::format("parse slice: ValueComplete");
+      DVLOG(2) << "parse slice: ValueComplete";
       ASSERT(!pending_value_stack_.empty());
       pending_value_stack_.pop_front();
       if (pending_value_stack_.empty()) {

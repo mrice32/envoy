@@ -98,7 +98,7 @@ Upstream::ClusterManager& InstanceImpl::clusterManager() { return config_->clust
 Tracing::HttpTracer& InstanceImpl::httpTracer() { return config_->httpTracer(); }
 
 void InstanceImpl::drainListeners() {
-  LOG(WARNING) << fmt::format("closing and draining listeners");
+  LOG(WARNING) << "closing and draining listeners";
   for (const auto& worker : workers_) {
     Worker& worker_ref = *worker;
     worker->dispatcher().post([&worker_ref]() -> void { worker_ref.handler()->closeListeners(); });
@@ -113,7 +113,7 @@ void InstanceImpl::failHealthcheck(bool fail) {
 }
 
 void InstanceImpl::flushStats() {
-  VLOG(1) << fmt::format("flushing stats");
+  DVLOG(1) << "flushing stats";
   HotRestart::GetParentStatsInfo info;
   restarter_.getParentStats(info);
   server_stats_.uptime_.set(time(nullptr) - original_start_time_);
@@ -246,19 +246,18 @@ void InstanceImpl::initialize(Options& options, TestHooks& hooks,
 
   // Setup signals.
   sigterm_ = handler_.dispatcher().listenForSignal(SIGTERM, [this]() -> void {
-    LOG(WARNING) << fmt::format("caught SIGTERM");
+    LOG(WARNING) << "caught SIGTERM";
     restarter_.terminateParent();
     handler_.dispatcher().exit();
   });
 
   sig_usr_1_ = handler_.dispatcher().listenForSignal(SIGUSR1, [this]() -> void {
-    LOG(WARNING) << fmt::format("caught SIGUSR1");
+    LOG(WARNING) << "caught SIGUSR1";
     access_log_manager_.reopen();
   });
 
   sig_hup_ = handler_.dispatcher().listenForSignal(SIGHUP, []() -> void {
-    LOG(WARNING) << fmt::format(
-        "caught and eating SIGHUP. See documentation for how to hot restart.");
+    LOG(WARNING) << "caught and eating SIGHUP. See documentation for how to hot restart.";
   });
 
   initializeStatSinks();
@@ -277,13 +276,13 @@ void InstanceImpl::initialize(Options& options, TestHooks& hooks,
   // upstream clusters are initialized which may involve running the event loop. Note however that
   // this can fire immediately if all clusters have already initialized.
   clusterManager().setInitializedCb([this, &hooks]() -> void {
-    LOG(WARNING) << fmt::format("all clusters initialized. initializing init manager");
+    LOG(WARNING) << "all clusters initialized. initializing init manager";
     init_manager_.initialize([this, &hooks]() -> void { startWorkers(hooks); });
   });
 }
 
 void InstanceImpl::startWorkers(TestHooks& hooks) {
-  LOG(WARNING) << fmt::format("all dependencies initialized. starting workers");
+  LOG(WARNING) << "all dependencies initialized. starting workers";
   for (const WorkerPtr& worker : workers_) {
     try {
       worker->initializeConfiguration(*config_, socket_map_, *guard_dog_);
@@ -332,9 +331,9 @@ void InstanceImpl::initializeStatSinks() {
     stats_store_.addSink(*stat_sinks_.back());
   } else if (config_->statsdUdpPort().valid()) {
     // TODO(hennna): DEPRECATED - statsdUdpPort will be removed in 1.4.0.
-    LOG(WARNING) << fmt::format(
+    LOG(WARNING) << 
         "statsd_local_udp_port has been DEPRECATED and will be removed in 1.4.0. "
-        "Consider setting statsd_udp_ip_address instead.");
+        "Consider setting statsd_udp_ip_address instead.";
     LOG(INFO) << fmt::format("statsd UDP port: {}", config_->statsdUdpPort().value());
     Network::Address::InstanceConstSharedPtr address(
         new Network::Address::Ipv4Instance(config_->statsdUdpPort().value()));
@@ -358,7 +357,7 @@ void InstanceImpl::loadServerFlags(const Optional<std::string>& flags_path) {
 
   LOG(INFO) << fmt::format("server flags path: {}", flags_path.value());
   if (handler_.api().fileExists(flags_path.value() + "/drain")) {
-    LOG(WARNING) << fmt::format("starting server in drain mode");
+    LOG(WARNING) << "starting server in drain mode";
     failHealthcheck(true);
   }
 }
@@ -376,11 +375,11 @@ uint64_t InstanceImpl::numConnections() {
 
 void InstanceImpl::run() {
   // Run the main dispatch loop waiting to exit.
-  LOG(WARNING) << fmt::format("starting main dispatch loop");
+  LOG(WARNING) << "starting main dispatch loop";
   auto watchdog = guard_dog_->createWatchDog(Thread::Thread::currentThreadId());
   watchdog->startWatchdog(handler_.dispatcher());
   handler_.dispatcher().run(Event::Dispatcher::RunType::Block);
-  LOG(WARNING) << fmt::format("main dispatch loop exited");
+  LOG(WARNING) << "main dispatch loop exited";
   guard_dog_->stopWatching(watchdog);
   watchdog.reset();
 
@@ -400,7 +399,7 @@ void InstanceImpl::run() {
   config_->clusterManager().shutdown();
   handler_.closeConnections();
   thread_local_.shutdownThread();
-  LOG(WARNING) << fmt::format("exiting");
+  LOG(WARNING) << "exiting";
 #ifdef GLOG_ON
   google::FlushLogFiles(google::INFO);
 #else
@@ -411,17 +410,17 @@ void InstanceImpl::run() {
 Runtime::Loader& InstanceImpl::runtime() { return *runtime_loader_; }
 
 void InstanceImpl::shutdown() {
-  LOG(WARNING) << fmt::format("shutdown invoked. sending SIGTERM to self");
+  LOG(WARNING) << "shutdown invoked. sending SIGTERM to self";
   kill(getpid(), SIGTERM);
 }
 
 void InstanceImpl::shutdownAdmin() {
-  LOG(WARNING) << fmt::format("shutting down admin due to child startup");
+  LOG(WARNING) << "shutting down admin due to child startup";
   stat_flush_timer_.reset();
   handler_.closeListeners();
   admin_->mutable_socket().close();
 
-  LOG(WARNING) << fmt::format("terminating parent process");
+  LOG(WARNING) << "terminating parent process";
   restarter_.terminateParent();
 }
 

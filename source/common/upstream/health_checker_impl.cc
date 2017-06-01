@@ -290,14 +290,14 @@ void HttpHealthCheckerImpl::HttpActiveHealthCheckSession::onResetStream(Http::St
     return;
   }
 
-  VLOG(1) << format_connection_log("connection/stream error health_flags={}", *client_,
+  DVLOG(1) << format_connection_log("connection/stream error health_flags={}", *client_,
                                    HostUtility::healthFlagsToString(*host_));
   handleFailure(true);
 }
 
 bool HttpHealthCheckerImpl::HttpActiveHealthCheckSession::isHealthCheckSucceeded() {
   uint64_t response_code = Http::Utility::getResponseStatus(*response_headers_);
-  VLOG(1) << format_connection_log("hc response={} health_flags={}", *client_, response_code,
+  DVLOG(1) << format_connection_log("hc response={} health_flags={}", *client_, response_code,
                                    HostUtility::healthFlagsToString(*host_));
 
   if (response_code != enumToInt(Http::Code::OK)) {
@@ -336,7 +336,7 @@ void HttpHealthCheckerImpl::HttpActiveHealthCheckSession::onResponseComplete() {
 }
 
 void HttpHealthCheckerImpl::HttpActiveHealthCheckSession::onTimeout() {
-  VLOG(1) << format_connection_log("connection/stream timeout health_flags={}", *client_,
+  DVLOG(1) << format_connection_log("connection/stream timeout health_flags={}", *client_,
                                    HostUtility::healthFlagsToString(*host_));
 
   // If there is an active request it will get reset, so make sure we ignore the reset.
@@ -390,7 +390,7 @@ TcpHealthCheckerImpl::TcpActiveHealthCheckSession::~TcpActiveHealthCheckSession(
 }
 
 void TcpHealthCheckerImpl::TcpActiveHealthCheckSession::onData(Buffer::Instance& data) {
-  VLOG(2) << format_connection_log("total pending buffer={}", *client_, data.length());
+  DVLOG(2) << format_connection_log("total pending buffer={}", *client_, data.length());
   if (TcpHealthCheckMatcher::match(parent_.receive_bytes_, data)) {
     data.drain(data.length());
     handleSuccess();
