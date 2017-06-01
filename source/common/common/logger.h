@@ -59,8 +59,10 @@ enum class Id {
 #ifdef GLOG_ON
 
 #define LOG_TO_OBJECT(LOG_OBJECT, LEVEL) LOG(LEVEL)
+#define DLOG_TO_OBJECT(LOG_OBJECT, LEVEL) DLOG(LEVEL)
 
 #define VLOG_TO_OBJECT(LOG, LEVEL) VLOG(LEVEL)
+#define DVLOG_TO_OBJECT(LOG_OBJECT, LEVEL) DVLOG(LEVEL)
 
 #else
 
@@ -105,6 +107,7 @@ private:
 class NullStream {
 public:
   template <typename T> NullStream& operator<<(T&& t) {
+    UNREFERENCED_PARAMETER(t);
     return *this;
   }
 };
