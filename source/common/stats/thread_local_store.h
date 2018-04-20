@@ -98,6 +98,7 @@ private:
     ThreadLocalStoreImpl& parent_;
     const std::string prefix_;
     TlsCacheEntry central_cache_;
+    mutable std::mutex scope_lock_;
   };
 
   struct TlsCache : public ThreadLocal::ThreadLocalObject {

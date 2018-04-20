@@ -28,6 +28,7 @@ std::list<CounterSharedPtr> ThreadLocalStoreImpl::counters() const {
   std::unordered_set<std::string> names;
   std::unique_lock<std::mutex> lock(lock_);
   for (ScopeImpl* scope : scopes_) {
+    std::unique_lock<std::mutex> lock(scope->scope_lock_);
     for (auto counter : scope->central_cache_.counters_) {
       if (names.insert(counter.first).second) {
         ret.push_back(counter.second);
@@ -51,6 +52,7 @@ std::list<GaugeSharedPtr> ThreadLocalStoreImpl::gauges() const {
   std::unordered_set<std::string> names;
   std::unique_lock<std::mutex> lock(lock_);
   for (ScopeImpl* scope : scopes_) {
+    std::unique_lock<std::mutex> lock(scope->scope_lock_);
     for (auto gauge : scope->central_cache_.gauges_) {
       if (names.insert(gauge.first).second) {
         ret.push_back(gauge.second);
@@ -135,7 +137,7 @@ Counter& ThreadLocalStoreImpl::ScopeImpl::counter(const std::string& name) {
 
   // We must now look in the central store so we must be locked. We grab a reference to the
   // central store location. It might contain nothing. In this case, we allocate a new stat.
-  std::unique_lock<std::mutex> lock(parent_.lock_);
+  std::unique_lock<std::mutex> lock(scope_lock_);
   CounterSharedPtr& central_ref = central_cache_.counters_[final_name];
   if (!central_ref) {
     SafeAllocData alloc = parent_.safeAlloc(final_name);
@@ -183,7 +185,7 @@ Gauge& ThreadLocalStoreImpl::ScopeImpl::gauge(const std::string& name) {
     return **tls_ref;
   }
 
-  std::unique_lock<std::mutex> lock(parent_.lock_);
+  std::unique_lock<std::mutex> lock(scope_lock_);
   GaugeSharedPtr& central_ref = central_cache_.gauges_[final_name];
   if (!central_ref) {
     SafeAllocData alloc = parent_.safeAlloc(final_name);
@@ -213,7 +215,7 @@ Histogram& ThreadLocalStoreImpl::ScopeImpl::histogram(const std::string& name) {
     return **tls_ref;
   }
 
-  std::unique_lock<std::mutex> lock(parent_.lock_);
+  std::unique_lock<std::mutex> lock(scope_lock_);
   HistogramSharedPtr& central_ref = central_cache_.histograms_[final_name];
   if (!central_ref) {
     std::vector<Tag> tags;
